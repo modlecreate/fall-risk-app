@@ -258,43 +258,68 @@
 
         // --- Render Forms Dynamically ---
         function renderForms() {
+            // Helper function สำหรับสร้าง Radio Button ให้สวยงาม (แบบ Checkbox ติ๊กง่าย)
+            const createRadio = (name, title, options, color) => {
+                const opts = options.map(o => `
+                    <label class="flex items-start gap-2 text-xs p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-${color}-50 w-full transition-all shadow-sm">
+                        <input type="radio" name="${name}" value="${o.v}" ${o.c?'checked':''} class="mt-0.5 w-4 h-4 accent-${color}-600 flex-shrink-0">
+                        <span class="leading-tight text-gray-700">${o.t}</span>
+                    </label>
+                `).join('');
+                return `<div class="mb-4"><p class="font-bold text-sm mb-2 text-gray-800">${title}</p><div class="flex flex-col gap-2">${opts}</div></div>`;
+            };
+
             // MNA
-            document.getElementById('form-mna').innerHTML = `
-                <select id="mna_a" class="w-full border p-1 rounded text-xs"><option value="0">A. อาหารลดลงมาก (0)</option><option value="1">A. ลดลงปานกลาง (1)</option><option value="2" selected>A. ไม่ลดลง (2)</option></select>
-                <select id="mna_b" class="w-full border p-1 rounded text-xs"><option value="0">B. น้ำหนักลด >3กก (0)</option><option value="1">B. ไม่ทราบ (1)</option><option value="2">B. ลด 1-3กก (2)</option><option value="3" selected>B. ไม่ลด (3)</option></select>
-                <select id="mna_c" class="w-full border p-1 rounded text-xs"><option value="0">C. ติดเตียง/เก้าอี้ (0)</option><option value="1">C. ลุกได้ไม่ออกนอกบ้าน (1)</option><option value="2" selected>C. ออกนอกบ้านได้ (2)</option></select>
-                <select id="mna_d" class="w-full border p-1 rounded text-xs"><option value="0">D. มีความเครียดรุนแรง 3 เดือน (0)</option><option value="2" selected>D. ไม่มี (2)</option></select>
-                <select id="mna_e" class="w-full border p-1 rounded text-xs"><option value="0">E. สมองเสื่อม/ซึมเศร้ารุนแรง (0)</option><option value="1">E. สมองเสื่อมเล็กน้อย (1)</option><option value="2" selected>E. ไม่มี (2)</option></select>
-            `;
+            document.getElementById('form-mna').innerHTML = 
+                createRadio('mna_a', 'A. ความอยากอาหารลดลง (ใน 3 เดือน)', [{v:0,t:'ลดลงมาก (0)'}, {v:1,t:'ลดลงปานกลาง (1)'}, {v:2,t:'ไม่ลดลง (2)',c:true}], 'blue') +
+                createRadio('mna_b', 'B. น้ำหนักลดลง (ใน 3 เดือน)', [{v:0,t:'ลด > 3 กก. (0)'}, {v:1,t:'ไม่ทราบ (1)'}, {v:2,t:'ลด 1-3 กก. (2)'}, {v:3,t:'ไม่ลด (3)',c:true}], 'blue') +
+                createRadio('mna_c', 'C. การเคลื่อนไหว', [{v:0,t:'ติดเตียง/เก้าอี้ (0)'}, {v:1,t:'ลุกได้ ไม่ออกนอกบ้าน (1)'}, {v:2,t:'ออกนอกบ้านได้ (2)',c:true}], 'blue') +
+                createRadio('mna_d', 'D. มีความเครียดรุนแรง/ป่วยเฉียบพลัน (ใน 3 เดือน)', [{v:0,t:'มี (0)'}, {v:2,t:'ไม่มี (2)',c:true}], 'blue') +
+                createRadio('mna_e', 'E. ปัญหาประสาท/จิตใจ', [{v:0,t:'สมองเสื่อม/ซึมเศร้ารุนแรง (0)'}, {v:1,t:'สมองเสื่อมเล็กน้อย (1)'}, {v:2,t:'ไม่มี (2)',c:true}], 'blue');
+
             // SARC-F
-            document.getElementById('form-sarcf').innerHTML = `
-                <select id="sarc_s" class="w-full border p-1 rounded text-xs"><option value="0" selected>S: ยก 4.5กก ไม่ลำบาก (0)</option><option value="1">ลำบากบ้าง (1)</option><option value="2">ทำไม่ได้ (2)</option></select>
-                <select id="sarc_a" class="w-full border p-1 rounded text-xs"><option value="0" selected>A: เดินข้ามห้อง ไม่ลำบาก (0)</option><option value="1">ลำบากบ้าง (1)</option><option value="2">ต้องใช้อุปกรณ์ (2)</option></select>
-                <select id="sarc_r" class="w-full border p-1 rounded text-xs"><option value="0" selected>R: ลุกจากเก้าอี้ ไม่ลำบาก (0)</option><option value="1">ลำบากบ้าง (1)</option><option value="2">ต้องมีคนช่วย (2)</option></select>
-                <select id="sarc_c" class="w-full border p-1 rounded text-xs"><option value="0" selected>C: ขึ้นบันได 10ขั้น ไม่ลำบาก (0)</option><option value="1">ลำบากบ้าง (1)</option><option value="2">ทำไม่ได้ (2)</option></select>
-                <select id="sarc_f" class="w-full border p-1 rounded text-xs"><option value="0" selected>F: หกล้มใน 1 ปี ไม่ล้ม (0)</option><option value="1">ล้ม 1-3 ครั้ง (1)</option><option value="2">ล้ม 4 ครั้งขึ้นไป (2)</option></select>
-            `;
+            document.getElementById('form-sarcf').innerHTML = 
+                createRadio('sarc_s', 'S: ยกของหนัก 4.5 กก.', [{v:0,t:'ไม่ลำบาก (0)',c:true}, {v:1,t:'ลำบากบ้าง (1)'}, {v:2,t:'ทำไม่ได้ (2)'}], 'orange') +
+                createRadio('sarc_a', 'A: เดินข้ามห้อง', [{v:0,t:'ไม่ลำบาก (0)',c:true}, {v:1,t:'ลำบากบ้าง (1)'}, {v:2,t:'ต้องใช้อุปกรณ์ช่วย (2)'}], 'orange') +
+                createRadio('sarc_r', 'R: ลุกจากเก้าอี้/เตียง', [{v:0,t:'ไม่ลำบาก (0)',c:true}, {v:1,t:'ลำบากบ้าง (1)'}, {v:2,t:'ต้องมีคนช่วย (2)'}], 'orange') +
+                createRadio('sarc_c', 'C: ขึ้นบันได 10 ขั้น', [{v:0,t:'ไม่ลำบาก (0)',c:true}, {v:1,t:'ลำบากบ้าง (1)'}, {v:2,t:'ทำไม่ได้ (2)'}], 'orange') +
+                createRadio('sarc_f', 'F: หกล้มใน 1 ปีที่ผ่านมา', [{v:0,t:'ไม่ล้ม (0)',c:true}, {v:1,t:'ล้ม 1-3 ครั้ง (1)'}, {v:2,t:'ล้ม 4 ครั้งขึ้นไป (2)'}], 'orange');
+
             // OF-5
             const of5q = ["1. ฟันเหลือน้อยกว่า 20 ซี่", "2. เคี้ยวอาหารลำบาก/เคี้ยวของแข็งยาก", "3. กลืนลำบาก/สำลักบ่อย", "4. รู้สึกปากแห้งบ่อย", "5. ออกเสียงพูดชัดเจนได้ลำบาก"];
-            document.getElementById('form-of5').innerHTML = of5q.map((q, i) => `<div class="flex justify-between items-center"><span class="text-xs">${q}</span><select id="of5_${i}" class="border p-1 rounded text-xs"><option value="0">ไม่ใช่ (0)</option><option value="1">ใช่ (1)</option></select></div>`).join('');
+            document.getElementById('form-of5').innerHTML = of5q.map((q, i) => `
+                <div class="mb-4">
+                    <p class="font-bold text-sm mb-2 text-gray-800">${q}</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center justify-center gap-1 text-xs p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-pink-50 transition-all shadow-sm"><input type="radio" name="of5_${i}" value="0" checked class="w-4 h-4 accent-pink-600"> ไม่ใช่ (0)</label>
+                        <label class="flex items-center justify-center gap-1 text-xs p-2.5 border border-gray-200 rounded-lg cursor-pointer hover:bg-pink-50 transition-all shadow-sm"><input type="radio" name="of5_${i}" value="1" class="w-4 h-4 accent-pink-600"> ใช่ (1)</label>
+                    </div>
+                </div>
+            `).join('');
             
             // EAT-10
-            const eatq = ["1.น้ำหนักลด", "2.รบกวนการทานนอกบ้าน", "3.กลืนของเหลวยาก", "4.กลืนของแข็งยาก", "5.กลืนยาเม็ดยาก", "6.กลืนแล้วเจ็บ", "7.ความสุขในการทานลดลง", "8.อาหารติดคอ", "9.ไอเวลาทาน", "10.การกลืนทำให้เครียด"];
-            document.getElementById('form-eat10').innerHTML = eatq.map((q, i) => `<div class="flex justify-between items-center"><span class="text-xs truncate w-2/3">${q}</span><select id="eat_${i}" class="border p-1 rounded text-xs w-1/3"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>`).join('');
+            const eatq = ["1. น้ำหนักลด", "2. รบกวนการทานนอกบ้าน", "3. กลืนของเหลวยาก", "4. กลืนของแข็งยาก", "5. กลืนยาเม็ดยาก", "6. กลืนแล้วเจ็บ", "7. ความสุขในการทานลดลง", "8. อาหารติดคอ", "9. ไอเวลาทาน", "10. การกลืนทำให้เครียด"];
+            document.getElementById('form-eat10').innerHTML = eatq.map((q, i) => `
+                <div class="mb-4 pb-4 border-b border-gray-200 last:border-0 last:mb-0 last:pb-0">
+                    <p class="font-bold text-sm mb-2 text-gray-800">${q}</p>
+                    <div class="flex justify-between gap-1">
+                        ${[0,1,2,3,4].map(v => `<label class="flex flex-col items-center gap-1 text-[10px] p-2 flex-1 border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:bg-purple-50 transition-all"><input type="radio" name="eat_${i}" value="${v}" ${v===0?'checked':''} class="w-4 h-4 accent-purple-600"> <span class="font-bold text-gray-600">${v}</span></label>`).join('')}
+                    </div>
+                </div>
+            `).join('');
 
             // ADL
-            document.getElementById('form-adl').innerHTML = `
-                <select id="adl_1" class="w-full border p-1 rounded text-xs"><option value="0">ทานอาหาร: ต้องป้อน (0)</option><option value="1">ช่วยบ้าง (1)</option><option value="2" selected>ทำเองได้ (2)</option></select>
-                <select id="adl_2" class="w-full border p-1 rounded text-xs"><option value="0">ล้างหน้า แปรงฟัน: ต้องช่วย (0)</option><option value="1" selected>ทำเองได้ (1)</option></select>
-                <select id="adl_3" class="w-full border p-1 rounded text-xs"><option value="0">ลุกนั่ง: ทำไม่ได้ (0)</option><option value="1">2คนช่วย (1)</option><option value="2">ช่วยบ้าง (2)</option><option value="3" selected>ทำเองได้ (3)</option></select>
-                <select id="adl_4" class="w-full border p-1 rounded text-xs"><option value="0">ห้องน้ำ: ทำไม่ได้ (0)</option><option value="1">ช่วยบ้าง (1)</option><option value="2" selected>ทำเองได้ (2)</option></select>
-                <select id="adl_5" class="w-full border p-1 rounded text-xs"><option value="0">เคลื่อนที่: ไม่ได้ (0)</option><option value="1">รถเข็น (1)</option><option value="2">เดินมีคนช่วย (2)</option><option value="3" selected>เดินเอง (3)</option></select>
-                <select id="adl_6" class="w-full border p-1 rounded text-xs"><option value="0">ใส่เสื้อผ้า: ต้องช่วย (0)</option><option value="1">ช่วยครึ่งนึง (1)</option><option value="2" selected>ทำเองได้ (2)</option></select>
-                <select id="adl_7" class="w-full border p-1 rounded text-xs"><option value="0">ขึ้นลงบันได: ไม่ได้ (0)</option><option value="1">ช่วยบ้าง (1)</option><option value="2" selected>ทำเองได้ (2)</option></select>
-                <select id="adl_8" class="w-full border p-1 rounded text-xs"><option value="0">อาบน้ำ: ต้องช่วย (0)</option><option value="1" selected>ทำเองได้ (1)</option></select>
-                <select id="adl_9" class="w-full border p-1 rounded text-xs"><option value="0">กลั้นอุจจาระ: ไม่ได้ (0)</option><option value="1">ได้บ้าง (1)</option><option value="2" selected>ปกติ (2)</option></select>
-                <select id="adl_10" class="w-full border p-1 rounded text-xs"><option value="0">กลั้นปัสสาวะ: ไม่ได้ (0)</option><option value="1">ได้บ้าง (1)</option><option value="2" selected>ปกติ (2)</option></select>
-            `;
+            document.getElementById('form-adl').innerHTML = 
+                createRadio('adl_1', '1. ทานอาหาร', [{v:0,t:'ต้องป้อน (0)'}, {v:1,t:'ช่วยบ้าง (1)'}, {v:2,t:'ทำเองได้ (2)',c:true}], 'teal') +
+                createRadio('adl_2', '2. ล้างหน้า แปรงฟัน', [{v:0,t:'ต้องช่วย (0)'}, {v:1,t:'ทำเองได้ (1)',c:true}], 'teal') +
+                createRadio('adl_3', '3. ลุกนั่ง: จากเตียงไปเก้าอี้', [{v:0,t:'ทำไม่ได้ (0)'}, {v:1,t:'ใช้ 2 คนช่วย (1)'}, {v:2,t:'ช่วยบ้าง (2)'}, {v:3,t:'ทำเองได้ (3)',c:true}], 'teal') +
+                createRadio('adl_4', '4. การใช้ห้องน้ำ', [{v:0,t:'ทำไม่ได้ (0)'}, {v:1,t:'ช่วยบ้าง (1)'}, {v:2,t:'ทำเองได้ (2)',c:true}], 'teal') +
+                createRadio('adl_5', '5. การเคลื่อนที่ภายในบ้าน', [{v:0,t:'เคลื่อนที่ไม่ได้ (0)'}, {v:1,t:'ใช้รถเข็นเองได้ (1)'}, {v:2,t:'เดินมีคนช่วย (2)'}, {v:3,t:'เดินเอง (3)',c:true}], 'teal') +
+                createRadio('adl_6', '6. การสวมใส่เสื้อผ้า', [{v:0,t:'ต้องช่วยทั้งหมด (0)'}, {v:1,t:'ช่วยครึ่งนึง (1)'}, {v:2,t:'ทำเองได้ (2)',c:true}], 'teal') +
+                createRadio('adl_7', '7. การขึ้นลงบันได 1 ชั้น', [{v:0,t:'ทำไม่ได้ (0)'}, {v:1,t:'ช่วยบ้าง (1)'}, {v:2,t:'ทำเองได้ (2)',c:true}], 'teal') +
+                createRadio('adl_8', '8. การอาบน้ำ', [{v:0,t:'ต้องช่วย (0)'}, {v:1,t:'ทำเองได้ (1)',c:true}], 'teal') +
+                createRadio('adl_9', '9. การกลั้นอุจจาระ', [{v:0,t:'กลั้นไม่ได้ (0)'}, {v:1,t:'ได้บ้าง (1)'}, {v:2,t:'กลั้นได้ปกติ (2)',c:true}], 'teal') +
+                createRadio('adl_10', '10. การกลั้นปัสสาวะ', [{v:0,t:'กลั้นไม่ได้ (0)'}, {v:1,t:'ได้บ้าง (1)'}, {v:2,t:'กลั้นได้ปกติ (2)',c:true}], 'teal');
         }
 
         // --- Core Application Logic ---
@@ -370,7 +395,7 @@
             const calf = parseFloat(document.getElementById('val-calf').value) || 0;
 
             // 1. MNA-SF
-            let mnaScore = parseInt(document.getElementById('mna_a').value) + parseInt(document.getElementById('mna_b').value) + parseInt(document.getElementById('mna_c').value) + parseInt(document.getElementById('mna_d').value) + parseInt(document.getElementById('mna_e').value);
+            let mnaScore = parseInt(document.querySelector('input[name="mna_a"]:checked').value) + parseInt(document.querySelector('input[name="mna_b"]:checked').value) + parseInt(document.querySelector('input[name="mna_c"]:checked').value) + parseInt(document.querySelector('input[name="mna_d"]:checked').value) + parseInt(document.querySelector('input[name="mna_e"]:checked').value);
             let bmi = 0, mnaF = 0;
             if(w>0 && h>0) { bmi = w / Math.pow(h/100, 2); if(bmi<19) mnaF=0; else if(bmi<21) mnaF=1; else if(bmi<23) mnaF=2; else mnaF=3; }
             else { mnaF = (calf < 31) ? 0 : 3; }
@@ -378,19 +403,19 @@
             let mnaRes = (mnaScore >= 12) ? "ปกติ" : (mnaScore >= 8) ? "เสี่ยงขาดสารอาหาร" : "ขาดสารอาหาร";
 
             // 2. SARC-F
-            let sarcScore = parseInt(document.getElementById('sarc_s').value) + parseInt(document.getElementById('sarc_a').value) + parseInt(document.getElementById('sarc_r').value) + parseInt(document.getElementById('sarc_c').value) + parseInt(document.getElementById('sarc_f').value);
+            let sarcScore = parseInt(document.querySelector('input[name="sarc_s"]:checked').value) + parseInt(document.querySelector('input[name="sarc_a"]:checked').value) + parseInt(document.querySelector('input[name="sarc_r"]:checked').value) + parseInt(document.querySelector('input[name="sarc_c"]:checked').value) + parseInt(document.querySelector('input[name="sarc_f"]:checked').value);
             let sarcRes = (sarcScore >= 4) ? "เสี่ยงมวลกล้ามเนื้อน้อย" : "ปกติ";
 
             // 3. OF-5
-            let of5Score = 0; for(let i=0;i<5;i++) of5Score += parseInt(document.getElementById(`of5_${i}`).value);
+            let of5Score = 0; for(let i=0;i<5;i++) of5Score += parseInt(document.querySelector(`input[name="of5_${i}"]:checked`).value);
             let of5Res = (of5Score >= 2) ? "มีภาวะช่องปากเปราะบาง" : "ปกติ";
 
             // 4. EAT-10
-            let eatScore = 0; for(let i=0;i<10;i++) eatScore += parseInt(document.getElementById(`eat_${i}`).value);
+            let eatScore = 0; for(let i=0;i<10;i++) eatScore += parseInt(document.querySelector(`input[name="eat_${i}"]:checked`).value);
             let eatRes = (eatScore >= 3) ? "ผิดปกติ (ควรตรวจเพิ่ม)" : "ปกติ";
 
             // 5. Barthel ADL
-            let adlScore = 0; for(let i=1;i<=10;i++) adlScore += parseInt(document.getElementById(`adl_${i}`).value);
+            let adlScore = 0; for(let i=1;i<=10;i++) adlScore += parseInt(document.querySelector(`input[name="adl_${i}"]:checked`).value);
             let adlRes = (adlScore >= 12) ? "ติดสังคม" : (adlScore >= 5) ? "ติดบ้าน" : "ติดเตียง";
 
             // 6. Physical (มข.)
@@ -432,7 +457,8 @@
             ui.loader();
             let p = {
                 patient_id: document.getElementById('assess-patient').value, assessment_type: document.querySelector('input[name="assess_type"]:checked').value,
-                recommendation: document.getElementById('val-recommendation').value, tug_sec: document.getElementById('val-tug').value||0, sts5_sec: document.getElementById('val-sts').value||0, walk10m_sec: document.getElementById('val-walk').value||0, grip_strength_kg: document.getElementById('val-grip').value||0, calf_circumference_cm: document.getElementById('val-calf').value||0
+                recommendation: document.getElementById('val-recommendation').value, tug_sec: document.getElementById('val-tug').value||0, sts5_sec: document.getElementById('val-sts').value||0, walk10m_sec: document.getElementById('val-walk').value||0, grip_strength_kg: document.getElementById('val-grip').value||0, calf_circumference_cm: document.getElementById('val-calf').value||0,
+                created_by: currentUser.id
             };
             Object.assign(p, calculatedScores); // add new columns silently
 

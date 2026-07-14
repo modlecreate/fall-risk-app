@@ -3,442 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบันทึกสมรรถภาพทางกายผู้สูงอายุ (Fall Risk & Sarcopenia)</title>
+    <title>ระบบประเมินสุขภาพผู้สูงอายุแบบองค์รวม (CGA)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Kanit', 'sans-serif'] },
-                    colors: { primary: '#1E3A8A', secondary: '#3B82F6', accent: '#10B981', warning: '#F59E0B', danger: '#EF4444' }
-                }
-            }
+            theme: { extend: { fontFamily: { sans: ['Kanit', 'sans-serif'] }, colors: { primary: '#1E3A8A', secondary: '#3B82F6', accent: '#10B981', warning: '#F59E0B', danger: '#EF4444' } } }
         }
     </script>
-
     <style>
         body { font-family: 'Kanit', sans-serif; background-color: #F3F4F6; }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
         .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        #loader {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.8); z-index: 9999; 
-            justify-content: center; align-items: center; flex-direction: column;
-        }
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1); border-left-color: #1E3A8A;
-            border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite;
-        }
+        #loader { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner { border: 4px solid rgba(0,0,0,0.1); border-left-color: #1E3A8A; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="text-gray-800">
 
-    <div id="loader">
-        <div class="spinner mb-4"></div>
-        <p class="text-primary font-semibold">กำลังประมวลผล...</p>
-    </div>
+    <div id="loader"><div class="spinner mb-4"></div><p class="text-primary font-semibold">กำลังประมวลผล...</p></div>
 
+    <!-- LOGIN -->
     <div id="login-view" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300 p-4">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-            <div class="text-center mb-8">
+            <div class="text-center mb-6">
                 <i class="fa-solid fa-notes-medical text-5xl text-primary mb-4"></i>
-                <h1 class="text-2xl font-bold text-gray-800">Fall Risk Assessment</h1>
-                <p class="text-gray-500 text-sm">ระบบบันทึกสมรรถภาพทางกายผู้สูงอายุ</p>
+                <h1 class="text-2xl font-bold text-gray-800">CGA Assessment</h1>
+                <p class="text-gray-500 text-sm">ระบบประเมินสุขภาพผู้สูงอายุแบบองค์รวม</p>
             </div>
-            <form id="login-form" onsubmit="handleLogin(event)">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">ชื่อผู้ใช้งาน</label>
-                    <input type="text" id="username" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required placeholder="เช่น pt01 หรือ admin">
-                </div>
-                <div class="mb-6">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">รหัสผ่าน</label>
-                    <input type="password" id="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="w-full bg-primary hover:bg-blue-900 text-white font-bold py-3 px-4 rounded-lg transition duration-200">
-                    เข้าสู่ระบบ
-                </button>
+            <form onsubmit="handleLogin(event)">
+                <div class="mb-4"><label class="block text-sm font-bold mb-2">ชื่อผู้ใช้งาน</label><input type="text" id="username" class="w-full px-4 py-2 border rounded-lg" required></div>
+                <div class="mb-6"><label class="block text-sm font-bold mb-2">รหัสผ่าน</label><input type="password" id="password" class="w-full px-4 py-2 border rounded-lg" required></div>
+                <button type="submit" class="w-full bg-primary hover:bg-blue-900 text-white font-bold py-3 px-4 rounded-lg">เข้าสู่ระบบ</button>
             </form>
-            <div class="mt-4 text-xs text-gray-400 text-center">
-                Demo Account: User (pt01 / pt1234), Admin (admin / admin123)
-            </div>
         </div>
     </div>
 
+    <!-- MAIN APP -->
     <div id="main-view" class="hidden h-screen flex flex-col md:flex-row overflow-hidden">
         
+        <!-- Sidebar -->
         <aside class="hidden md:flex w-64 bg-primary text-white flex-col shadow-lg z-20">
             <div class="p-6 flex items-center gap-3 border-b border-blue-700">
-                <i class="fa-solid fa-user-nurse text-2xl"></i>
-                <div>
-                    <h2 class="font-bold">Fall Risk Clinic</h2>
-                    <p class="text-xs text-blue-200" id="user-display-desktop">Loading...</p>
-                </div>
+                <i class="fa-solid fa-user-nurse text-2xl"></i><div><h2 class="font-bold">CGA Clinic</h2><p class="text-xs text-blue-200" id="user-display-desktop"></p></div>
             </div>
             <nav class="flex-1 px-4 py-6 space-y-2">
-                <button onclick="navigate('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-blue-700 transition" data-target="dashboard">
-                    <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
-                </button>
-                <button onclick="navigate('patients')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-blue-700 transition" data-target="patients">
-                    <i class="fa-solid fa-users w-5"></i> ข้อมูลผู้สูงอายุ
-                </button>
-                <button onclick="navigate('assessments')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-blue-700 transition" data-target="assessments">
-                    <i class="fa-solid fa-clipboard-list w-5"></i> ประเมินสมรรถภาพ
-                </button>
-                <button id="menu-admin-users" onclick="navigate('users')" class="hidden nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-blue-700 transition" data-target="users">
-                    <i class="fa-solid fa-user-shield w-5"></i> จัดการผู้ใช้งาน
-                </button>
+                <button onclick="navigate('dashboard')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left" data-target="dashboard"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</button>
+                <button onclick="navigate('patients')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left" data-target="patients"><i class="fa-solid fa-users w-5"></i> ข้อมูลผู้สูงอายุ</button>
+                <button onclick="navigate('assessments')" class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left" data-target="assessments"><i class="fa-solid fa-clipboard-list w-5"></i> ประเมินสมรรถภาพ</button>
             </nav>
-            <div class="p-4 border-t border-blue-700">
-                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-2 text-red-300 hover:text-red-100 hover:bg-blue-800 rounded-lg transition">
-                    <i class="fa-solid fa-sign-out-alt"></i> ออกจากระบบ
-                </button>
-            </div>
+            <div class="p-4 border-t border-blue-700"><button onclick="handleLogout()" class="w-full text-red-300 hover:text-red-100"><i class="fa-solid fa-sign-out-alt"></i> ออกจากระบบ</button></div>
         </aside>
 
-        <main class="flex-1 bg-gray-50 flex flex-col relative h-full overflow-y-auto pb-20 md:pb-0">
-            
-            <header class="md:hidden bg-primary text-white p-4 shadow-md flex justify-between items-center sticky top-0 z-10">
-                <div class="flex items-center gap-2">
-                    <i class="fa-solid fa-notes-medical"></i>
-                    <h1 class="font-bold">Fall Risk App</h1>
-                </div>
-                <button onclick="handleLogout()" class="text-red-300 text-sm"><i class="fa-solid fa-sign-out-alt"></i> ออกจากระบบ</button>
+        <main class="flex-1 flex flex-col h-full overflow-y-auto pb-20 md:pb-0">
+            <header class="md:hidden bg-primary text-white p-4 flex justify-between items-center sticky top-0 z-10">
+                <div class="font-bold"><i class="fa-solid fa-notes-medical"></i> CGA App</div>
+                <button onclick="handleLogout()" class="text-red-300 text-sm"><i class="fa-solid fa-sign-out-alt"></i> ออก</button>
             </header>
 
-            <div class="p-4 md:p-8 flex-1">
-                
+            <div class="p-4 md:p-8">
+                <!-- Dashboard -->
                 <div id="view-dashboard" class="view-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">ภาพรวมสถิติ (Dashboard)</h2>
-                        <button onclick="exportReport()" class="bg-accent hover:bg-emerald-600 text-white px-4 py-2 rounded-lg text-sm shadow flex items-center gap-2">
-                            <i class="fa-solid fa-file-excel"></i> <span class="hidden sm:inline">ส่งออกรายงาน</span>
-                        </button>
+                        <h2 class="text-2xl font-bold">Dashboard</h2>
+                        <button onclick="exportReport()" class="bg-accent text-white px-4 py-2 rounded shadow text-sm"><i class="fa-solid fa-file-excel"></i> ส่งออกรายงาน</button>
                     </div>
-                    
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                        <div class="bg-white p-4 rounded-xl shadow border-l-4 border-primary">
-                            <p class="text-sm text-gray-500">จำนวนผู้สูงอายุทั้งหมด</p>
-                            <h3 class="text-3xl font-bold text-gray-800" id="stat-total-patients">0</h3>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow border-l-4 border-secondary">
-                            <p class="text-sm text-gray-500">จำนวนครั้งที่ประเมิน</p>
-                            <h3 class="text-3xl font-bold text-gray-800" id="stat-total-assessments">0</h3>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow border-l-4 border-danger">
-                            <p class="text-sm text-gray-500">ผู้มีความเสี่ยงล้มสูง</p>
-                            <h3 class="text-3xl font-bold text-danger" id="stat-high-risk">0</h3>
-                        </div>
-                        <div class="bg-white p-4 rounded-xl shadow border-l-4 border-accent">
-                            <p class="text-sm text-gray-500">ผู้มีความเสี่ยงต่ำ</p>
-                            <h3 class="text-3xl font-bold text-accent" id="stat-low-risk">0</h3>
-                        </div>
-                    </div>
-                    
                     <div class="bg-white p-6 rounded-xl shadow">
-                        <h3 class="font-bold text-gray-800 mb-4 border-b pb-2">ผู้ที่มีความเสี่ยงสูง (อัปเดตล่าสุด)</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left">
-                                <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-                                    <tr>
-                                        <th class="px-4 py-3 rounded-tl-lg">HN</th>
-                                        <th class="px-4 py-3">ชื่อ-สกุล</th>
-                                        <th class="px-4 py-3">อายุ/เพศ</th>
-                                        <th class="px-4 py-3">TUG (วิ)</th>
-                                        <th class="px-4 py-3 rounded-tr-lg">ผลประเมินรวม</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="dashboard-high-risk-list" class="divide-y">
-                                    </tbody>
-                            </table>
-                        </div>
+                        <p class="text-gray-500 mb-4">ระบบประเมิน 5 ด้าน (โภชนาการ, มวลกล้ามเนื้อ, ช่องปาก, การกลืน, กิจวัตรประจำวัน) และสมรรถภาพทางกาย (มข.)</p>
+                        <h3 class="font-bold mb-2">ประวัติการประเมินล่าสุด</h3>
+                        <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-gray-100"><tr><th class="p-2">วันที่</th><th class="p-2">ชื่อ</th><th class="p-2">ความเสี่ยงรวม</th></tr></thead><tbody id="dash-list"></tbody></table></div>
                     </div>
                 </div>
 
+                <!-- Patients -->
                 <div id="view-patients" class="view-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">จัดการข้อมูลผู้สูงอายุ</h2>
-                        <button onclick="openPatientModal()" class="bg-primary hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm shadow flex items-center gap-2">
-                            <i class="fa-solid fa-plus"></i> เพิ่มข้อมูล
-                        </button>
+                        <h2 class="text-2xl font-bold">ผู้สูงอายุ</h2>
+                        <button onclick="openPatientModal()" class="bg-primary text-white px-4 py-2 rounded text-sm"><i class="fa-solid fa-plus"></i> เพิ่มข้อมูล</button>
                     </div>
-                    <div class="bg-white rounded-xl shadow overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left">
-                                <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-                                    <tr>
-                                        <th class="px-4 py-3">HN</th>
-                                        <th class="px-4 py-3">ชื่อ-สกุล</th>
-                                        <th class="px-4 py-3">อายุ (ปี)</th>
-                                        <th class="px-4 py-3">เพศ</th>
-                                        <th class="px-4 py-3">โรคประจำตัว</th>
-                                        <th class="px-4 py-3">จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="patients-list" class="divide-y">
-                                    </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div class="bg-white rounded-xl shadow overflow-hidden"><table class="w-full text-sm text-left"><thead class="bg-gray-100"><tr><th class="p-3">HN</th><th class="p-3">ชื่อ-สกุล</th><th class="p-3">อายุ/เพศ</th><th class="p-3">จัดการ</th></tr></thead><tbody id="patients-list"></tbody></table></div>
                 </div>
 
+                <!-- Assessments -->
                 <div id="view-assessments" class="view-section hidden">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">ประเมินสมรรถภาพ</h2>
-                        <button onclick="openAssessmentModal()" class="bg-primary hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm shadow flex items-center gap-2">
-                            <i class="fa-solid fa-stethoscope"></i> เริ่มประเมิน
-                        </button>
+                        <h2 class="text-2xl font-bold">ประเมินสมรรถภาพ</h2>
+                        <button onclick="openAssessmentModal()" class="bg-primary text-white px-4 py-2 rounded text-sm"><i class="fa-solid fa-stethoscope"></i> เริ่มประเมิน</button>
                     </div>
-                    <div class="bg-white rounded-xl shadow overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left">
-                                <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-                                    <tr>
-                                        <th class="px-4 py-3">วันที่</th>
-                                        <th class="px-4 py-3">ผู้สูงอายุ</th>
-                                        <th class="px-4 py-3">ประเภท</th>
-                                        <th class="px-4 py-3">Grip (กก.)</th>
-                                        <th class="px-4 py-3">รอบน่อง (ซม.)</th>
-                                        <th class="px-4 py-3">ผลลัพธ์รวม</th>
-                                        <th class="px-4 py-3 text-center">LINE / จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="assessments-list" class="divide-y">
-                                    </tbody>
-                            </table>
-                        </div>
-                    </div>
+                    <div class="bg-white rounded-xl shadow overflow-hidden"><table class="w-full text-sm text-left"><thead class="bg-gray-100"><tr><th class="p-3">วันที่</th><th class="p-3">ชื่อ</th><th class="p-3">สรุปผลรวม</th><th class="p-3 text-center">จัดการ</th></tr></thead><tbody id="assessments-list"></tbody></table></div>
                 </div>
-                
-                <div id="view-users" class="view-section hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold text-gray-800">จัดการผู้ใช้งานระบบ</h2>
-                        <span class="bg-warning text-white text-xs px-2 py-1 rounded">เฉพาะ Admin</span>
-                    </div>
-                    <div class="bg-white rounded-xl shadow overflow-hidden">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-                                <tr>
-                                    <th class="px-4 py-3">Username</th>
-                                    <th class="px-4 py-3">ชื่อ-สกุล</th>
-                                    <th class="px-4 py-3">สิทธิ์</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-list" class="divide-y">
-                                </tbody>
-                        </table>
-                    </div>
-                </div>
-
             </div>
         </main>
 
-        <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 flex justify-around shadow-[0_-2px_10px_rgba(0,0,0,0.05)] z-20 pb-safe">
-            <button onclick="navigate('dashboard')" class="nav-btn-mobile flex flex-col items-center p-3 text-gray-500 hover:text-primary transition w-1/4" data-target="dashboard">
-                <i class="fa-solid fa-chart-pie text-lg mb-1"></i><span class="text-[10px]">Dashboard</span>
-            </button>
-            <button onclick="navigate('patients')" class="nav-btn-mobile flex flex-col items-center p-3 text-gray-500 hover:text-primary transition w-1/4" data-target="patients">
-                <i class="fa-solid fa-users text-lg mb-1"></i><span class="text-[10px]">คนไข้</span>
-            </button>
-            <button onclick="navigate('assessments')" class="nav-btn-mobile flex flex-col items-center p-3 text-primary hover:text-blue-800 transition w-1/4 relative" data-target="assessments">
-                <div class="absolute -top-4 bg-primary text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg border-2 border-white">
-                    <i class="fa-solid fa-plus"></i>
-                </div>
-                <span class="text-[10px] mt-4">ประเมิน</span>
-            </button>
-            <button id="mobile-menu-admin" onclick="navigate('users')" class="hidden nav-btn-mobile flex flex-col items-center p-3 text-gray-500 hover:text-primary transition w-1/4" data-target="users">
-                <i class="fa-solid fa-user-shield text-lg mb-1"></i><span class="text-[10px]">ระบบ</span>
-            </button>
-            <button id="mobile-menu-logout" onclick="handleLogout()" class="nav-btn-mobile flex flex-col items-center p-3 text-gray-500 hover:text-red-500 transition w-1/4">
-                <i class="fa-solid fa-sign-out-alt text-lg mb-1"></i><span class="text-[10px]">ออก</span>
-            </button>
+        <!-- Mobile Nav -->
+        <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t flex justify-around z-20 pb-safe">
+            <button onclick="navigate('dashboard')" class="nav-btn-mobile p-3 text-gray-500 w-1/3 flex flex-col items-center" data-target="dashboard"><i class="fa-solid fa-chart-pie text-lg"></i><span class="text-[10px]">สถิติ</span></button>
+            <button onclick="navigate('patients')" class="nav-btn-mobile p-3 text-gray-500 w-1/3 flex flex-col items-center" data-target="patients"><i class="fa-solid fa-users text-lg"></i><span class="text-[10px]">คนไข้</span></button>
+            <button onclick="navigate('assessments')" class="nav-btn-mobile p-3 text-gray-500 w-1/3 flex flex-col items-center" data-target="assessments"><i class="fa-solid fa-clipboard-check text-lg"></i><span class="text-[10px]">ประเมิน</span></button>
         </nav>
     </div>
 
+    <!-- Modals -->
+    
+    <!-- Patient Modal -->
     <div id="modal-patient" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center p-4 border-b">
-                <h3 class="font-bold text-lg" id="modal-patient-title">เพิ่มข้อมูลผู้สูงอายุ</h3>
-                <button onclick="closeModal('modal-patient')" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-times text-xl"></i></button>
-            </div>
-            <form id="form-patient" onsubmit="savePatient(event)" class="p-4 space-y-4 text-sm">
-                <input type="hidden" id="patient-id">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">รหัส HN *</label>
-                        <input type="text" id="patient-hn" required class="w-full border rounded p-2" placeholder="เช่น HN1234">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">คำนำหน้า</label>
-                        <select id="patient-prefix" class="w-full border rounded p-2">
-                            <option value="นาย">นาย</option>
-                            <option value="นาง">นาง</option>
-                            <option value="นางสาว">นางสาว</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">ชื่อ *</label>
-                        <input type="text" id="patient-firstname" required class="w-full border rounded p-2">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">นามสกุล *</label>
-                        <input type="text" id="patient-lastname" required class="w-full border rounded p-2">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">อายุ (ปี) *</label>
-                        <input type="number" id="patient-age" required min="50" max="120" class="w-full border rounded p-2">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 font-medium mb-1">เพศ *</label>
-                        <select id="patient-gender" required class="w-full border rounded p-2">
-                            <option value="ชาย">ชาย</option>
-                            <option value="หญิง">หญิง</option>
-                        </select>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-gray-700 font-medium mb-1">โรคประจำตัว / ข้อควรระวัง</label>
-                    <textarea id="patient-disease" class="w-full border rounded p-2" rows="2" placeholder="เช่น เบาหวาน, ความดัน, เข่าเสื่อม..."></textarea>
-                </div>
-                <div class="flex justify-end gap-2 pt-4">
-                    <button type="button" onclick="closeModal('modal-patient')" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded hover:bg-blue-800">บันทึกข้อมูล</button>
-                </div>
+        <div class="bg-white rounded-xl w-full max-w-lg p-4">
+            <h3 class="font-bold text-lg mb-4">เพิ่มข้อมูลผู้สูงอายุ</h3>
+            <form id="form-patient" onsubmit="savePatient(event)" class="space-y-3 text-sm">
+                <input type="text" id="patient-hn" required class="w-full border p-2 rounded" placeholder="รหัส HN">
+                <div class="flex gap-2"><select id="patient-prefix" class="border p-2 rounded w-1/3"><option>นาย</option><option>นาง</option><option>นางสาว</option></select><input type="text" id="patient-firstname" required class="w-full border p-2 rounded" placeholder="ชื่อ"><input type="text" id="patient-lastname" required class="w-full border p-2 rounded" placeholder="นามสกุล"></div>
+                <div class="flex gap-2"><input type="number" id="patient-age" required class="w-1/2 border p-2 rounded" placeholder="อายุ (ปี)"><select id="patient-gender" class="w-1/2 border p-2 rounded"><option>ชาย</option><option>หญิง</option></select></div>
+                <textarea id="patient-disease" class="w-full border p-2 rounded" placeholder="โรคประจำตัว"></textarea>
+                <div class="flex justify-end gap-2"><button type="button" onclick="closeModal('modal-patient')" class="px-4 py-2 bg-gray-200 rounded">ยกเลิก</button><button type="submit" class="px-4 py-2 bg-primary text-white rounded">บันทึก</button></div>
             </form>
         </div>
     </div>
 
-    <div id="modal-assessment" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center p-4 border-b bg-blue-50 rounded-t-xl">
-                <h3 class="font-bold text-lg text-primary"><i class="fa-solid fa-stethoscope"></i> แบบประเมินสมรรถภาพทางกายและความเสี่ยงล้ม</h3>
-                <button onclick="closeModal('modal-assessment')" class="text-gray-500 hover:text-gray-800"><i class="fa-solid fa-times text-xl"></i></button>
+    <!-- Assessment Modal (Full CGA) -->
+    <div id="modal-assessment" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 md:p-4">
+        <div class="bg-gray-50 rounded-xl w-full max-w-3xl max-h-[95vh] flex flex-col shadow-2xl overflow-hidden">
+            <div class="bg-primary text-white p-4 flex justify-between items-center shrink-0">
+                <h3 class="font-bold"><i class="fa-solid fa-file-medical"></i> แบบประเมินสุขภาพองค์รวม (CGA)</h3>
+                <button onclick="closeModal('modal-assessment')" class="text-white hover:text-gray-200"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
-            <form id="form-assessment" onsubmit="saveAssessment(event)" class="p-4 space-y-4 text-sm">
-                
-                <div class="bg-gray-50 p-3 rounded border">
-                    <label class="block text-gray-700 font-medium mb-1">เลือกผู้สูงอายุ *</label>
-                    <select id="assess-patient" required class="w-full border rounded p-2 bg-white">
-                        <option value="">-- โหลดข้อมูล --</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-gray-700 font-medium mb-1">ประเภทการประเมิน *</label>
-                    <div class="flex gap-4">
-                        <label class="flex items-center gap-2"><input type="radio" name="assess_type" value="pre" required checked> ก่อนการรักษา (Pre)</label>
-                        <label class="flex items-center gap-2"><input type="radio" name="assess_type" value="post"> หลังการรักษา (Post)</label>
+            
+            <div class="p-4 overflow-y-auto flex-1 text-sm space-y-4">
+                <div class="bg-white p-3 rounded shadow-sm border border-gray-200">
+                    <label class="font-bold text-primary block mb-1">1. เลือกผู้สูงอายุ & ข้อมูลพื้นฐาน</label>
+                    <select id="assess-patient" required class="w-full border p-2 rounded mb-2 bg-blue-50"></select>
+                    <div class="flex gap-2">
+                        <label class="flex items-center gap-2"><input type="radio" name="assess_type" value="pre" checked> ก่อนรักษา</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="assess_type" value="post"> หลังรักษา</label>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <input type="number" id="val-weight" step="0.1" placeholder="น้ำหนัก (กก.)" class="border p-2 rounded w-full">
+                        <input type="number" id="val-height" step="0.1" placeholder="ส่วนสูง (ซม.)" class="border p-2 rounded w-full">
                     </div>
                 </div>
 
-                <div class="border rounded-lg p-3 bg-emerald-50/50 border-emerald-200">
-                    <h4 class="font-bold text-emerald-800 mb-2"><i class="fa-solid fa-dumbbell"></i> การคัดกรองภาวะมวลกล้ามเนื้อน้อย (คนไทย)</h4>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-gray-700 font-medium">Grip strength ข้างที่ถนัด</label>
-                            <div class="flex items-center gap-1 mt-1">
-                                <input type="number" id="val-grip" step="0.1" required class="w-full border rounded p-1.5 text-center font-bold text-emerald-700">
-                                <span class="text-xs">กก.</span>
-                            </div>
-                            <span class="text-[10px] text-gray-500 block mt-0.5">ปกติ: ชาย ≥28 / หญิง ≥18</span>
+                <!-- ACCORDIONS -->
+                <!-- 1. MNA-SF -->
+                <details class="bg-white border rounded shadow-sm group">
+                    <summary class="font-bold p-3 bg-blue-100 cursor-pointer flex justify-between items-center">
+                        <span><i class="fa-solid fa-apple-whole text-red-500"></i> แบบประเมินโภชนาการ (MNA-SF)</span>
+                        <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <div class="p-3 border-t space-y-3" id="form-mna"></div>
+                </details>
+
+                <!-- 2. SARC-F -->
+                <details class="bg-white border rounded shadow-sm group">
+                    <summary class="font-bold p-3 bg-orange-100 cursor-pointer flex justify-between items-center">
+                        <span><i class="fa-solid fa-dumbbell text-orange-600"></i> คัดกรองมวลกล้ามเนื้อ (SARC-F)</span>
+                        <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <div class="p-3 border-t space-y-3" id="form-sarcf"></div>
+                </details>
+
+                <!-- 3. OF-5 -->
+                <details class="bg-white border rounded shadow-sm group">
+                    <summary class="font-bold p-3 bg-pink-100 cursor-pointer flex justify-between items-center">
+                        <span><i class="fa-solid fa-tooth text-pink-500"></i> ช่องปากเปราะบาง (OF-5)</span>
+                        <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <div class="p-3 border-t space-y-2" id="form-of5"></div>
+                </details>
+
+                <!-- 4. EAT-10 -->
+                <details class="bg-white border rounded shadow-sm group">
+                    <summary class="font-bold p-3 bg-purple-100 cursor-pointer flex justify-between items-center">
+                        <span><i class="fa-solid fa-head-side-cough text-purple-600"></i> ความสามารถการกลืน (EAT-10)</span>
+                        <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <div class="p-3 border-t">
+                        <p class="text-xs text-gray-500 mb-2">ให้คะแนน 0(ไม่มีปัญหา) ถึง 4(มีปัญหามากที่สุด)</p>
+                        <div id="form-eat10" class="space-y-2"></div>
+                    </div>
+                </details>
+
+                <!-- 5. Barthel ADL -->
+                <details class="bg-white border rounded shadow-sm group">
+                    <summary class="font-bold p-3 bg-teal-100 cursor-pointer flex justify-between items-center">
+                        <span><i class="fa-solid fa-person-walking-with-cane text-teal-600"></i> กิจวัตรประจำวัน (Barthel ADL)</span>
+                        <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <div class="p-3 border-t space-y-3" id="form-adl"></div>
+                </details>
+
+                <!-- 6. Physical Performance -->
+                <details class="bg-white border rounded shadow-sm group" open>
+                    <summary class="font-bold p-3 bg-emerald-100 cursor-pointer flex justify-between items-center">
+                        <span><i class="fa-solid fa-person-running text-emerald-600"></i> สมรรถภาพทางกาย (เกณฑ์ มข.)</span>
+                        <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                    </summary>
+                    <div class="p-3 border-t space-y-3">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div><label class="block text-xs font-bold mb-1">Grip Strength (กก.)</label><input type="number" id="val-grip" step="0.1" class="border p-2 w-full rounded"><span class="text-[10px] text-gray-500">เกณฑ์: ชาย≥0.6, หญิง≥0.45 (/นน.ตัว)</span></div>
+                            <div><label class="block text-xs font-bold mb-1">เส้นรอบวงน่อง (ซม.)</label><input type="number" id="val-calf" step="0.1" class="border p-2 w-full rounded"><span class="text-[10px] text-gray-500">เกณฑ์: ชาย≥34, หญิง≥31</span></div>
+                            <div><label class="block text-xs font-bold mb-1">TUG (วินาที)</label><input type="number" id="val-tug" step="0.1" class="border p-2 w-full rounded"><span class="text-[10px] text-gray-500">ผ่าน: < 12 วิ</span></div>
+                            <div><label class="block text-xs font-bold mb-1">5xSTS (วินาที)</label><input type="number" id="val-sts" step="0.1" class="border p-2 w-full rounded"><span class="text-[10px] text-gray-500">ผ่าน: < 12 วิ</span></div>
+                            <div class="col-span-2"><label class="block text-xs font-bold mb-1">10MWT จับเวลาตรง 4 เมตร (วินาที)</label><input type="number" id="val-walk" step="0.1" class="border p-2 w-full rounded"><span class="text-[10px] text-gray-500">ผ่าน: ≤ 4 วิ</span></div>
                         </div>
-                        <div>
-                            <label class="block text-gray-700 font-medium">เส้นรอบวงน่อง (CC)</label>
-                            <div class="flex items-center gap-1 mt-1">
-                                <input type="number" id="val-calf" step="0.1" required class="w-full border rounded p-1.5 text-center font-bold text-emerald-700">
-                                <span class="text-xs">ซม.</span>
-                            </div>
-                            <span class="text-[10px] text-gray-500 block mt-0.5">ปกติ: ชาย ≥34 / หญิง ≥31</span>
-                        </div>
+                    </div>
+                </details>
+
+                <!-- Summary Preview -->
+                <div class="bg-yellow-50 p-3 rounded border border-yellow-300">
+                    <button type="button" onclick="calculateScores()" class="w-full bg-secondary text-white py-2 rounded shadow hover:bg-blue-600 font-bold mb-2"><i class="fa-solid fa-calculator"></i> ประมวลผลคะแนนทั้งหมด</button>
+                    <div id="preview-result-box" class="hidden">
+                        <textarea id="val-recommendation" rows="8" class="w-full border rounded p-2 text-xs bg-white"></textarea>
                     </div>
                 </div>
 
-                <div class="border rounded-lg p-3 bg-blue-50/50 border-blue-200 space-y-3">
-                    <h4 class="font-bold text-blue-800"><i class="fa-solid fa-walking"></i> การทดสอบสมรรถภาพทางกาย (Fall Risk)</h4>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div>
-                            <label class="block text-gray-700 text-xs font-medium">1. TUG (ลุกเดิน)</label>
-                            <div class="flex items-center gap-1 mt-1">
-                                <input type="number" id="val-tug" step="0.1" required class="w-full border rounded p-1 text-center font-bold text-blue-700">
-                                <span class="text-[10px]">วิ</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 text-xs font-medium">2. 5xSTS (ลุกนั่ง)</label>
-                            <div class="flex items-center gap-1 mt-1">
-                                <input type="number" id="val-sts" step="0.1" required class="w-full border rounded p-1 text-center font-bold text-blue-700">
-                                <span class="text-[10px]">วิ</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 text-xs font-medium">3. 10mWT (เดิน 10ม.)</label>
-                            <div class="flex items-center gap-1 mt-1">
-                                <input type="number" id="val-walk" step="0.1" required class="w-full border rounded p-1 text-center font-bold text-blue-700">
-                                <span class="text-[10px]">วิ</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                    <button type="button" onclick="previewAdvice()" class="w-full bg-secondary text-white py-2 rounded shadow mb-2 hover:bg-blue-600">
-                        <i class="fa-solid fa-magic"></i> ประมวลผลและสร้างคำแนะนำทางกายภาพบำบัด
-                    </button>
-                    <div id="preview-result-box" class="hidden space-y-2">
-                        <p class="font-bold text-gray-800">ความเสี่ยงรวม: <span id="preview-risk" class="text-base"></span></p>
-                        <div>
-                            <label class="block text-gray-700 font-medium text-xs">คำแนะนำทางกายภาพบำบัดสำหรับคัดลอกลง LINE (แก้ไขได้):</label>
-                            <textarea id="val-recommendation" rows="4" class="w-full border rounded p-2 mt-1 text-xs bg-white"></textarea>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex justify-end gap-2">
-                    <button type="button" onclick="closeModal('modal-assessment')" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 bg-accent text-white rounded hover:bg-emerald-600 shadow">บันทึกผลการประเมิน</button>
-                </div>
-            </form>
+            </div>
+            
+            <div class="p-4 border-t flex justify-end gap-2 shrink-0 bg-white">
+                <button type="button" onclick="closeModal('modal-assessment')" class="px-4 py-2 bg-gray-200 rounded">ยกเลิก</button>
+                <button type="button" onclick="saveAssessment()" class="px-4 py-2 bg-accent text-white rounded shadow font-bold">บันทึกประวัติ</button>
+            </div>
         </div>
     </div>
 
+    <!-- Modal LINE -->
     <div id="modal-line" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm">
-            <div class="bg-[#00B900] text-white p-3 rounded-t-xl flex justify-between items-center">
-                <h3 class="font-bold"><i class="fab fa-line text-xl"></i> ส่งข้อความให้คนไข้</h3>
-                <button onclick="closeModal('modal-line')" class="text-white hover:text-gray-200"><i class="fa-solid fa-times"></i></button>
-            </div>
-            <div class="p-4 bg-gray-100">
-                <div class="bg-white p-3 rounded border shadow-sm text-xs whitespace-pre-wrap font-sans max-h-[350px] overflow-y-auto" id="line-message-content">
-                    -- Content --
-                </div>
-            </div>
-            <div class="p-4 border-t flex justify-center">
-                <button onclick="copyToLine()" class="bg-[#00B900] hover:bg-green-700 text-white font-bold py-2 px-6 rounded-full shadow flex items-center gap-2 transition w-full justify-center">
-                    <i class="fa-regular fa-copy"></i> คัดลอกข้อความ
-                </button>
-            </div>
+        <div class="bg-white rounded-xl w-full max-w-sm">
+            <div class="bg-[#00B900] text-white p-3 rounded-t-xl flex justify-between"><h3 class="font-bold"><i class="fab fa-line"></i> ส่งข้อความ</h3><button onclick="closeModal('modal-line')"><i class="fa-solid fa-times"></i></button></div>
+            <div class="p-3 bg-gray-100"><div class="bg-white p-3 rounded text-xs whitespace-pre-wrap max-h-[60vh] overflow-y-auto" id="line-content"></div></div>
+            <div class="p-3 border-t"><button onclick="copyToLine()" class="bg-[#00B900] text-white w-full py-2 rounded-full font-bold">คัดลอกข้อความ</button></div>
         </div>
     </div>
 
     <script>
         // --- 1. Supabase Configuration ---
+        // *** IMPORTANT: อย่าลืมแก้ตรงนี้เป็น URL และ KEY ของโปรเจกต์คุณนะครับ ***
         const SUPABASE_URL = 'https://yjdhjeabhyfmelbedgal.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_Q-DEVE8GD-gxDytNMFKq3g_NNRccpkK';
         
@@ -449,425 +254,217 @@
             }
         } catch(e) { console.warn("Supabase initialization error."); }
 
-        // --- 2. Global State ---
-        let currentUser = null;
-        let allPatients = [];
-        let allAssessments = [];
+        let currentUser = null, allPatients = [], allAssessments = [];
 
-        // --- 3. UI Helpers ---
-        const showLoader = () => document.getElementById('loader').style.display = 'flex';
-        const hideLoader = () => document.getElementById('loader').style.display = 'none';
-        const showError = (msg) => Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: msg, confirmButtonColor: '#1E3A8A' });
-        const showSuccess = (msg) => Swal.fire({ icon: 'success', title: 'สำเร็จ', text: msg, timer: 1500, showConfirmButton: false });
-        const openModal = (id) => document.getElementById(id).classList.remove('hidden');
-        const closeModal = (id) => document.getElementById(id).classList.add('hidden');
-
-        // --- 4. Navigation & Layout ---
-        function navigate(viewId) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+        // --- Render Forms Dynamically ---
+        function renderForms() {
+            // MNA
+            document.getElementById('form-mna').innerHTML = `
+                <select id="mna_a" class="w-full border p-1 rounded text-xs"><option value="0">A. อาหารลดลงมาก (0)</option><option value="1">A. ลดลงปานกลาง (1)</option><option value="2" selected>A. ไม่ลดลง (2)</option></select>
+                <select id="mna_b" class="w-full border p-1 rounded text-xs"><option value="0">B. น้ำหนักลด >3กก (0)</option><option value="1">B. ไม่ทราบ (1)</option><option value="2">B. ลด 1-3กก (2)</option><option value="3" selected>B. ไม่ลด (3)</option></select>
+                <select id="mna_c" class="w-full border p-1 rounded text-xs"><option value="0">C. ติดเตียง/เก้าอี้ (0)</option><option value="1">C. ลุกได้ไม่ออกนอกบ้าน (1)</option><option value="2" selected>C. ออกนอกบ้านได้ (2)</option></select>
+                <select id="mna_d" class="w-full border p-1 rounded text-xs"><option value="0">D. มีความเครียดรุนแรง 3 เดือน (0)</option><option value="2" selected>D. ไม่มี (2)</option></select>
+                <select id="mna_e" class="w-full border p-1 rounded text-xs"><option value="0">E. สมองเสื่อม/ซึมเศร้ารุนแรง (0)</option><option value="1">E. สมองเสื่อมเล็กน้อย (1)</option><option value="2" selected>E. ไม่มี (2)</option></select>
+            `;
+            // SARC-F
+            document.getElementById('form-sarcf').innerHTML = `
+                <select id="sarc_s" class="w-full border p-1 rounded text-xs"><option value="0" selected>S: ยก 4.5กก ไม่ลำบาก (0)</option><option value="1">ลำบากบ้าง (1)</option><option value="2">ทำไม่ได้ (2)</option></select>
+                <select id="sarc_a" class="w-full border p-1 rounded text-xs"><option value="0" selected>A: เดินข้ามห้อง ไม่ลำบาก (0)</option><option value="1">ลำบากบ้าง (1)</option><option value="2">ต้องใช้อุปกรณ์ (2)</option></select>
+                <select id="sarc_r" class="w-full border p-1 rounded text-xs"><option value="0" selected>R: ลุกจากเก้าอี้ ไม่ลำบาก (0)</option><option value="1">ลำบากบ้าง (1)</option><option value="2">ต้องมีคนช่วย (2)</option></select>
+                <select id="sarc_c" class="w-full border p-1 rounded text-xs"><option value="0" selected>C: ขึ้นบันได 10ขั้น ไม่ลำบาก (0)</option><option value="1">ลำบากบ้าง (1)</option><option value="2">ทำไม่ได้ (2)</option></select>
+                <select id="sarc_f" class="w-full border p-1 rounded text-xs"><option value="0" selected>F: หกล้มใน 1 ปี ไม่ล้ม (0)</option><option value="1">ล้ม 1-3 ครั้ง (1)</option><option value="2">ล้ม 4 ครั้งขึ้นไป (2)</option></select>
+            `;
+            // OF-5
+            const of5q = ["1. ฟันเหลือน้อยกว่า 20 ซี่", "2. เคี้ยวอาหารลำบาก/เคี้ยวของแข็งยาก", "3. กลืนลำบาก/สำลักบ่อย", "4. รู้สึกปากแห้งบ่อย", "5. ออกเสียงพูดชัดเจนได้ลำบาก"];
+            document.getElementById('form-of5').innerHTML = of5q.map((q, i) => `<div class="flex justify-between items-center"><span class="text-xs">${q}</span><select id="of5_${i}" class="border p-1 rounded text-xs"><option value="0">ไม่ใช่ (0)</option><option value="1">ใช่ (1)</option></select></div>`).join('');
             
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                if(btn.dataset.target === viewId) btn.classList.add('bg-blue-900', 'border-l-4', 'border-accent');
-                else btn.classList.remove('bg-blue-900', 'border-l-4', 'border-accent');
-            });
-            document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
-                if(btn.dataset.target === viewId) btn.classList.add('text-primary');
-                else btn.classList.remove('text-primary');
-            });
+            // EAT-10
+            const eatq = ["1.น้ำหนักลด", "2.รบกวนการทานนอกบ้าน", "3.กลืนของเหลวยาก", "4.กลืนของแข็งยาก", "5.กลืนยาเม็ดยาก", "6.กลืนแล้วเจ็บ", "7.ความสุขในการทานลดลง", "8.อาหารติดคอ", "9.ไอเวลาทาน", "10.การกลืนทำให้เครียด"];
+            document.getElementById('form-eat10').innerHTML = eatq.map((q, i) => `<div class="flex justify-between items-center"><span class="text-xs truncate w-2/3">${q}</span><select id="eat_${i}" class="border p-1 rounded text-xs w-1/3"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>`).join('');
 
-            if (viewId === 'dashboard') loadDashboard();
-            if (viewId === 'patients') loadPatients();
-            if (viewId === 'assessments') loadAssessments();
-            if (viewId === 'users' && currentUser?.role === 'admin') loadUsers();
+            // ADL
+            document.getElementById('form-adl').innerHTML = `
+                <select id="adl_1" class="w-full border p-1 rounded text-xs"><option value="0">ทานอาหาร: ต้องป้อน (0)</option><option value="1">ช่วยบ้าง (1)</option><option value="2" selected>ทำเองได้ (2)</option></select>
+                <select id="adl_2" class="w-full border p-1 rounded text-xs"><option value="0">ล้างหน้า แปรงฟัน: ต้องช่วย (0)</option><option value="1" selected>ทำเองได้ (1)</option></select>
+                <select id="adl_3" class="w-full border p-1 rounded text-xs"><option value="0">ลุกนั่ง: ทำไม่ได้ (0)</option><option value="1">2คนช่วย (1)</option><option value="2">ช่วยบ้าง (2)</option><option value="3" selected>ทำเองได้ (3)</option></select>
+                <select id="adl_4" class="w-full border p-1 rounded text-xs"><option value="0">ห้องน้ำ: ทำไม่ได้ (0)</option><option value="1">ช่วยบ้าง (1)</option><option value="2" selected>ทำเองได้ (2)</option></select>
+                <select id="adl_5" class="w-full border p-1 rounded text-xs"><option value="0">เคลื่อนที่: ไม่ได้ (0)</option><option value="1">รถเข็น (1)</option><option value="2">เดินมีคนช่วย (2)</option><option value="3" selected>เดินเอง (3)</option></select>
+                <select id="adl_6" class="w-full border p-1 rounded text-xs"><option value="0">ใส่เสื้อผ้า: ต้องช่วย (0)</option><option value="1">ช่วยครึ่งนึง (1)</option><option value="2" selected>ทำเองได้ (2)</option></select>
+                <select id="adl_7" class="w-full border p-1 rounded text-xs"><option value="0">ขึ้นลงบันได: ไม่ได้ (0)</option><option value="1">ช่วยบ้าง (1)</option><option value="2" selected>ทำเองได้ (2)</option></select>
+                <select id="adl_8" class="w-full border p-1 rounded text-xs"><option value="0">อาบน้ำ: ต้องช่วย (0)</option><option value="1" selected>ทำเองได้ (1)</option></select>
+                <select id="adl_9" class="w-full border p-1 rounded text-xs"><option value="0">กลั้นอุจจาระ: ไม่ได้ (0)</option><option value="1">ได้บ้าง (1)</option><option value="2" selected>ปกติ (2)</option></select>
+                <select id="adl_10" class="w-full border p-1 rounded text-xs"><option value="0">กลั้นปัสสาวะ: ไม่ได้ (0)</option><option value="1">ได้บ้าง (1)</option><option value="2" selected>ปกติ (2)</option></select>
+            `;
         }
 
-        // --- 5. Authentication ---
-        function checkAuth() {
-            const storedUser = localStorage.getItem('fallRiskUser');
-            if (storedUser) {
-                currentUser = JSON.parse(storedUser);
-                setupLayoutBasedOnRole();
-                document.getElementById('login-view').classList.add('hidden');
-                document.getElementById('main-view').classList.remove('hidden');
-                navigate('dashboard');
-            } else {
-                document.getElementById('login-view').classList.remove('hidden');
-                document.getElementById('main-view').classList.add('hidden');
-            }
-        }
+        // --- Core Application Logic ---
+        const ui = {
+            loader: () => document.getElementById('loader').style.display = 'flex',
+            hide: () => document.getElementById('loader').style.display = 'none',
+            err: (m) => Swal.fire({icon:'error', text:m}),
+            ok: (m) => Swal.fire({icon:'success', text:m, timer:1500, showConfirmButton:false})
+        };
 
-        function setupLayoutBasedOnRole() {
-            document.getElementById('user-display-desktop').innerText = `${currentUser.full_name} (${currentUser.role})`;
-            if (currentUser.role === 'admin') {
-                document.getElementById('menu-admin-users').classList.remove('hidden');
-                document.getElementById('mobile-menu-admin').classList.remove('hidden');
-                document.getElementById('mobile-menu-logout').classList.add('hidden');
-            } else {
-                document.getElementById('menu-admin-users').classList.add('hidden');
-                document.getElementById('mobile-menu-admin').classList.add('hidden');
-                document.getElementById('mobile-menu-logout').classList.remove('hidden');
-            }
+        function navigate(v) {
+            document.querySelectorAll('.view-section').forEach(e => e.classList.add('hidden'));
+            document.getElementById('view-'+v).classList.remove('hidden');
+            if(v === 'patients') loadPatients();
+            if(v === 'assessments') loadAssessments();
+            if(v === 'dashboard') loadDashboard();
         }
 
         async function handleLogin(e) {
             e.preventDefault();
-            if(!supabaseClient) return showError("ยังไม่ได้เชื่อมต่อฐานข้อมูล");
-            const u = document.getElementById('username').value;
-            const p = document.getElementById('password').value;
-
-            showLoader();
-            try {
-                const { data, error } = await supabaseClient.from('app_users').select('*').eq('username', u).eq('password', p).single();
-                if (error) throw new Error("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
-                currentUser = data;
-                localStorage.setItem('fallRiskUser', JSON.stringify(data));
-                showSuccess("เข้าสู่ระบบสำเร็จ");
-                checkAuth();
-            } catch (err) { showError(err.message); } finally { hideLoader(); }
+            if(!supabaseClient) return ui.err("ยังไม่ได้เชื่อมต่อฐานข้อมูล");
+            ui.loader();
+            const u = document.getElementById('username').value, p = document.getElementById('password').value;
+            const { data, error } = await supabaseClient.from('app_users').select('*').eq('username', u).eq('password', p).single();
+            ui.hide();
+            if (error) return ui.err("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
+            currentUser = data; localStorage.setItem('cgaUser', JSON.stringify(data));
+            document.getElementById('login-view').classList.add('hidden'); document.getElementById('main-view').classList.remove('hidden');
+            document.getElementById('user-display-desktop').innerText = data.full_name;
+            renderForms(); navigate('dashboard');
         }
 
-        function handleLogout() {
-            localStorage.removeItem('fallRiskUser');
-            currentUser = null;
-            checkAuth();
+        function handleLogout() { localStorage.removeItem('cgaUser'); location.reload(); }
+
+        window.onload = () => {
+            const u = localStorage.getItem('cgaUser');
+            if(u) { currentUser = JSON.parse(u); document.getElementById('login-view').classList.add('hidden'); document.getElementById('main-view').classList.remove('hidden'); document.getElementById('user-display-desktop').innerText = currentUser.full_name; renderForms(); navigate('dashboard'); }
         }
 
-        // --- 6. Data Fetching & Rendering ---
-        async function loadDashboard() {
-            if(!supabaseClient) return;
-            try {
-                let queryAss = supabaseClient.from('assessments').select('*, patients(first_name, last_name, age, gender, hn_code)');
-                let queryPat = supabaseClient.from('patients').select('id', { count: 'exact' });
-                if (currentUser.role !== 'admin') {
-                    queryAss = queryAss.eq('created_by', currentUser.id);
-                    queryPat = queryPat.eq('created_by', currentUser.id);
-                }
-
-                const [resAss, resPat] = await Promise.all([queryAss, queryPat]);
-                if(resAss.error) throw resAss.error;
-
-                const assessments = resAss.data;
-                document.getElementById('stat-total-patients').innerText = resPat.count || 0;
-                document.getElementById('stat-total-assessments').innerText = assessments.length;
-                
-                const highRisk = assessments.filter(a => a.overall_risk === 'สูง');
-                const lowRisk = assessments.filter(a => a.overall_risk === 'ต่ำ');
-                document.getElementById('stat-high-risk').innerText = highRisk.length;
-                document.getElementById('stat-low-risk').innerText = lowRisk.length;
-
-                const html = highRisk.slice(0, 5).map(a => `
-                    <tr class="hover:bg-red-50 transition">
-                        <td class="px-4 py-2 font-medium">${a.patients?.hn_code || '-'}</td>
-                        <td class="px-4 py-2">${a.patients?.first_name || ''} ${a.patients?.last_name || ''}</td>
-                        <td class="px-4 py-2 text-xs">${a.patients?.age || '-'} ปี / ${a.patients?.gender || '-'}</td>
-                        <td class="px-4 py-2 text-danger font-bold">${a.tug_sec || '-'}</td>
-                        <td class="px-4 py-2"><span class="bg-danger text-white text-[10px] px-2 py-0.5 rounded-full">เสี่ยงสูง</span></td>
-                    </tr>
-                `).join('') || `<tr><td colspan="5" class="text-center py-4 text-gray-500">ไม่มีข้อมูลความเสี่ยงสูง</td></tr>`;
-                
-                document.getElementById('dashboard-high-risk-list').innerHTML = html;
-            } catch (err) { console.error(err); }
-        }
-
+        // Patients
         async function loadPatients() {
             if(!supabaseClient) return;
-            showLoader();
-            try {
-                let query = supabaseClient.from('patients').select('*').order('created_at', { ascending: false });
-                if (currentUser.role !== 'admin') query = query.eq('created_by', currentUser.id);
-                
-                const { data, error } = await query;
-                if (error) throw error;
-                allPatients = data;
+            const {data} = await supabaseClient.from('patients').select('*').order('created_at',{ascending:false});
+            allPatients = data || [];
+            document.getElementById('patients-list').innerHTML = allPatients.map(p => `<tr class="border-b"><td class="p-2 text-primary font-bold">${p.hn_code}</td><td class="p-2">${p.prefix}${p.first_name} ${p.last_name}</td><td class="p-2">${p.age}/${p.gender}</td><td class="p-2"><button onclick="deletePatient('${p.id}')" class="text-red-500"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+            document.getElementById('assess-patient').innerHTML = '<option value="">-- เลือก --</option>' + allPatients.map(p => `<option value="${p.id}">${p.first_name} ${p.last_name} (${p.gender})</option>`).join('');
+        }
+        function openPatientModal() { document.getElementById('form-patient').reset(); document.getElementById('modal-patient').classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        async function savePatient(e) {
+            e.preventDefault(); ui.loader();
+            const payload = { hn_code: document.getElementById('patient-hn').value, prefix: document.getElementById('patient-prefix').value, first_name: document.getElementById('patient-firstname').value, last_name: document.getElementById('patient-lastname').value, age: document.getElementById('patient-age').value, gender: document.getElementById('patient-gender').value, underlying_disease: document.getElementById('patient-disease').value };
+            const {error} = await supabaseClient.from('patients').insert([payload]);
+            ui.hide(); if(error) return ui.err("HN ซ้ำ หรือบันทึกไม่ได้");
+            ui.ok('บันทึกสำเร็จ'); closeModal('modal-patient'); loadPatients();
+        }
 
-                document.getElementById('patients-list').innerHTML = data.map(p => `
-                    <tr class="hover:bg-blue-50 transition">
-                        <td class="px-4 py-3 font-medium text-primary">${p.hn_code}</td>
-                        <td class="px-4 py-3">${p.prefix || ''}${p.first_name} ${p.last_name}</td>
-                        <td class="px-4 py-3">${p.age}</td>
-                        <td class="px-4 py-3">${p.gender}</td>
-                        <td class="px-4 py-3 text-xs truncate max-w-[150px]">${p.underlying_disease || '-'}</td>
-                        <td class="px-4 py-3">
-                            <button onclick="deletePatient('${p.id}')" class="text-red-500 hover:bg-red-100 p-1 rounded"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `).join('') || `<tr><td colspan="6" class="text-center py-8 text-gray-500">ไม่มีข้อมูล</td></tr>`;
+        // Assessment Logic
+        function openAssessmentModal() {
+            if(!allPatients.length) return ui.err("เพิ่มข้อมูลผู้สูงอายุก่อนครับ");
+            document.getElementById('preview-result-box').classList.add('hidden');
+            document.getElementById('modal-assessment').classList.remove('hidden');
+        }
 
-                document.getElementById('assess-patient').innerHTML = '<option value="">-- เลือกผู้สูงอายุ --</option>' + 
-                    data.map(p => `<option value="${p.id}">[${p.hn_code}] ${p.first_name} ${p.last_name} (${p.gender})</option>`).join('');
-            } catch (err) { showError(err.message); } finally { hideLoader(); }
+        let calculatedScores = {};
+
+        function calculateScores() {
+            const pid = document.getElementById('assess-patient').value;
+            if(!pid) return alert("เลือกคนไข้ก่อน");
+            const patient = allPatients.find(p => p.id === pid);
+            const w = parseFloat(document.getElementById('val-weight').value) || 0;
+            const h = parseFloat(document.getElementById('val-height').value) || 0;
+            const calf = parseFloat(document.getElementById('val-calf').value) || 0;
+
+            // 1. MNA-SF
+            let mnaScore = parseInt(document.getElementById('mna_a').value) + parseInt(document.getElementById('mna_b').value) + parseInt(document.getElementById('mna_c').value) + parseInt(document.getElementById('mna_d').value) + parseInt(document.getElementById('mna_e').value);
+            let bmi = 0, mnaF = 0;
+            if(w>0 && h>0) { bmi = w / Math.pow(h/100, 2); if(bmi<19) mnaF=0; else if(bmi<21) mnaF=1; else if(bmi<23) mnaF=2; else mnaF=3; }
+            else { mnaF = (calf < 31) ? 0 : 3; }
+            mnaScore += mnaF;
+            let mnaRes = (mnaScore >= 12) ? "ปกติ" : (mnaScore >= 8) ? "เสี่ยงขาดสารอาหาร" : "ขาดสารอาหาร";
+
+            // 2. SARC-F
+            let sarcScore = parseInt(document.getElementById('sarc_s').value) + parseInt(document.getElementById('sarc_a').value) + parseInt(document.getElementById('sarc_r').value) + parseInt(document.getElementById('sarc_c').value) + parseInt(document.getElementById('sarc_f').value);
+            let sarcRes = (sarcScore >= 4) ? "เสี่ยงมวลกล้ามเนื้อน้อย" : "ปกติ";
+
+            // 3. OF-5
+            let of5Score = 0; for(let i=0;i<5;i++) of5Score += parseInt(document.getElementById(`of5_${i}`).value);
+            let of5Res = (of5Score >= 2) ? "มีภาวะช่องปากเปราะบาง" : "ปกติ";
+
+            // 4. EAT-10
+            let eatScore = 0; for(let i=0;i<10;i++) eatScore += parseInt(document.getElementById(`eat_${i}`).value);
+            let eatRes = (eatScore >= 3) ? "ผิดปกติ (ควรตรวจเพิ่ม)" : "ปกติ";
+
+            // 5. Barthel ADL
+            let adlScore = 0; for(let i=1;i<=10;i++) adlScore += parseInt(document.getElementById(`adl_${i}`).value);
+            let adlRes = (adlScore >= 12) ? "ติดสังคม" : (adlScore >= 5) ? "ติดบ้าน" : "ติดเตียง";
+
+            // 6. Physical (มข.)
+            const grip = parseFloat(document.getElementById('val-grip').value) || 0;
+            const tug = parseFloat(document.getElementById('val-tug').value) || 0;
+            const sts = parseFloat(document.getElementById('val-sts').value) || 0;
+            const walk = parseFloat(document.getElementById('val-walk').value) || 0;
+
+            let physAdv = [];
+            if(w>0) {
+                let ratio = grip/w;
+                let passGrip = (patient.gender==='ชาย') ? 0.6 : 0.45;
+                if(ratio < passGrip) physAdv.push("แรงบีบมือต่ำกว่าเกณฑ์ (เสี่ยงกล้ามเนื้ออ่อนแรง)");
+            }
+            if(tug >= 12) physAdv.push("TUG ≥12วิ (เสี่ยงหกล้ม)");
+            if(sts >= 12) physAdv.push("5xSTS ≥12วิ (กำลังขาต่ำ)");
+            if(walk > 4) physAdv.push("เดิน4ม. >4วิ (ความเร็วเดินช้า)");
+            
+            let overRisk = (mnaScore<12 || sarcScore>=4 || eatScore>=3 || physAdv.length>0) ? "สูง" : "ต่ำ/ปกติ";
+
+            calculatedScores = { mna_score:mnaScore, sarcf_score:sarcScore, of5_score:of5Score, eat10_score:eatScore, adl_score:adlScore, weight_kg:w, height_cm:h, overall_risk:overRisk };
+
+            let report = `📋 สรุปผลประเมินสุขภาพ (CGA)\nคนไข้: ${patient.first_name} ${patient.last_name}\n\n`;
+            report += `1. โภชนาการ (MNA): ${mnaScore}/14 (${mnaRes})\n`;
+            report += `2. กล้ามเนื้อ (SARC-F): ${sarcScore}/10 (${sarcRes})\n`;
+            report += `3. ช่องปาก (OF-5): ${of5Score}/5 (${of5Res})\n`;
+            report += `4. การกลืน (EAT-10): ${eatScore}/40 (${eatRes})\n`;
+            report += `5. กิจวัตรประจำวัน (ADL): ${adlScore}/20 (${adlRes})\n\n`;
+            report += `🏃 สมรรถภาพทางกาย (เกณฑ์ มข.):\n`;
+            report += (physAdv.length>0) ? physAdv.map(x=>"- "+x).join('\n') : "- ผ่านเกณฑ์ปกติทุกรายการ";
+            report += `\n\n⚠️ สรุปความเสี่ยงรวม: ${overRisk}`;
+
+            document.getElementById('val-recommendation').value = report;
+            document.getElementById('preview-result-box').classList.remove('hidden');
+        }
+
+        async function saveAssessment() {
+            if(document.getElementById('preview-result-box').classList.contains('hidden')) return alert("กดประมวลผลก่อนครับ");
+            ui.loader();
+            let p = {
+                patient_id: document.getElementById('assess-patient').value, assessment_type: document.querySelector('input[name="assess_type"]:checked').value,
+                recommendation: document.getElementById('val-recommendation').value, tug_sec: document.getElementById('val-tug').value||0, sts5_sec: document.getElementById('val-sts').value||0, walk10m_sec: document.getElementById('val-walk').value||0, grip_strength_kg: document.getElementById('val-grip').value||0, calf_circumference_cm: document.getElementById('val-calf').value||0
+            };
+            Object.assign(p, calculatedScores); // add new columns silently
+
+            const {error} = await supabaseClient.from('assessments').insert([p]);
+            ui.hide();
+            if(error) return ui.err("บันทึกไม่สำเร็จ (ตรวจสอบว่าอัปเดต SQL หรือยัง)");
+            ui.ok("บันทึกเรียบร้อย"); closeModal('modal-assessment'); loadAssessments(); loadDashboard();
         }
 
         async function loadAssessments() {
             if(!supabaseClient) return;
-            showLoader();
-            try {
-                let query = supabaseClient.from('assessments').select('*, patients(*)').order('created_at', { ascending: false });
-                if (currentUser.role !== 'admin') query = query.eq('created_by', currentUser.id);
-                
-                const { data, error } = await query;
-                if (error) throw error;
-                allAssessments = data;
-
-                document.getElementById('assessments-list').innerHTML = data.map(a => {
-                    const date = new Date(a.created_at).toLocaleDateString('th-TH', {day:'2-digit', month:'short', year:'2-digit'});
-                    const badgeColor = a.overall_risk === 'สูง' ? 'bg-danger' : (a.overall_risk === 'ปานกลาง' ? 'bg-warning' : 'bg-accent');
-                    const typeBadge = a.assessment_type === 'pre' ? 'bg-gray-200 text-gray-700' : 'bg-blue-100 text-blue-700';
-                    
-                    return `
-                    <tr class="hover:bg-blue-50 transition">
-                        <td class="px-4 py-3 text-xs">${date}</td>
-                        <td class="px-4 py-3 font-medium">
-                            ${a.patients?.first_name || ''} ${a.patients?.last_name || ''}<br>
-                            <span class="text-xs text-gray-500">HN: ${a.patients?.hn_code || '-'} (${a.patients?.gender || '-'})</span>
-                        </td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 text-[10px] rounded ${typeBadge} uppercase">${a.assessment_type}</span></td>
-                        <td class="px-4 py-3 font-bold text-emerald-700">${a.grip_strength_kg || '-'}</td>
-                        <td class="px-4 py-3 font-bold text-emerald-700">${a.calf_circumference_cm || '-'}</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 text-white text-xs rounded-full ${badgeColor}">${a.overall_risk}</span></td>
-                        <td class="px-4 py-3 text-center flex justify-center gap-2">
-                            <button onclick='openLineModal(${JSON.stringify(a).replace(/'/g, "&apos;")})' class="bg-[#00B900] text-white p-2 rounded-full hover:bg-green-700 shadow-sm"><i class="fab fa-line"></i></button>
-                            <button onclick="deleteAssessment('${a.id}')" class="text-red-500 hover:bg-red-100 p-2 rounded-full"><i class="fa-solid fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `}).join('') || `<tr><td colspan="7" class="text-center py-8 text-gray-500">ไม่มีข้อมูล</td></tr>`;
-            } catch (err) { showError(err.message); } finally { hideLoader(); }
+            const {data} = await supabaseClient.from('assessments').select('*, patients(*)').order('created_at',{ascending:false});
+            allAssessments = data || [];
+            document.getElementById('assessments-list').innerHTML = allAssessments.map(a => `<tr class="border-b"><td class="p-2 text-xs">${new Date(a.created_at).toLocaleDateString('th')}</td><td class="p-2">${a.patients.first_name}</td><td class="p-2"><span class="bg-${a.overall_risk==='สูง'?'red':'green'}-100 text-${a.overall_risk==='สูง'?'red':'green'}-700 px-2 py-1 rounded text-xs">${a.overall_risk}</span></td><td class="p-2 text-center"><button onclick="viewLine('${a.id}')" class="text-green-600 mx-1"><i class="fab fa-line"></i></button><button onclick="delAss('${a.id}')" class="text-red-500 mx-1"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
         }
-
-        async function loadUsers() {
-             if(!supabaseClient || currentUser.role !== 'admin') return;
-             try {
-                const { data, error } = await supabaseClient.from('app_users').select('id, username, role, full_name');
-                if(error) throw error;
-                document.getElementById('users-list').innerHTML = data.map(u => `
-                    <tr><td class="px-4 py-3">${u.username}</td><td class="px-4 py-3">${u.full_name}</td><td class="px-4 py-3 text-xs uppercase ${u.role==='admin'?'text-danger font-bold':''}">${u.role}</td></tr>
-                `).join('');
-             } catch(err) { console.error(err); }
+        function viewLine(id) {
+            let a = allAssessments.find(x => x.id === id);
+            document.getElementById('line-content').innerText = a.recommendation;
+            document.getElementById('modal-line').classList.remove('hidden');
         }
-
-        // --- 7. CRUD Operations ---
-        function openPatientModal() { document.getElementById('form-patient').reset(); openModal('modal-patient'); }
-
-        async function savePatient(e) {
-            e.preventDefault();
-            if(!supabaseClient) return;
-            const payload = {
-                hn_code: document.getElementById('patient-hn').value,
-                prefix: document.getElementById('patient-prefix').value,
-                first_name: document.getElementById('patient-firstname').value,
-                last_name: document.getElementById('patient-lastname').value,
-                age: document.getElementById('patient-age').value,
-                gender: document.getElementById('patient-gender').value,
-                underlying_disease: document.getElementById('patient-disease').value,
-                created_by: currentUser.id
-            };
-
-            showLoader();
-            try {
-                const { error } = await supabaseClient.from('patients').insert([payload]);
-                if (error) throw error;
-                showSuccess('เพิ่มข้อมูลสำเร็จ');
-                closeModal('modal-patient');
-                loadPatients();
-            } catch (err) { showError(err.message.includes('unique') ? 'รหัส HN นี้มีในระบบแล้ว' : err.message); } finally { hideLoader(); }
-        }
-
-        async function deletePatient(id) {
-            if(!confirm('ยืนยันการลบข้อมูลผู้ป่วยรายนี้? ข้อมูลประเมินทั้งหมดจะถูกลบด้วย')) return;
-            showLoader();
-            try {
-                const { error } = await supabaseClient.from('patients').delete().eq('id', id);
-                if (error) throw error;
-                showSuccess('ลบข้อมูลสำเร็จ');
-                loadPatients();
-            } catch (err) { showError(err.message); } finally { hideLoader(); }
-        }
-
-        function openAssessmentModal() {
-            if(allPatients.length === 0) return Swal.fire('แจ้งเตือน', 'กรุณาเพิ่มข้อมูลผู้สูงอายุก่อนทำการประเมิน', 'warning');
-            document.getElementById('form-assessment').reset();
-            document.getElementById('preview-result-box').classList.add('hidden');
-            openModal('modal-assessment');
-        }
-
-        // --- Medical Logic Core (Updated with Grip strength and Calf circumference for Thai standard) ---
-        function previewAdvice() {
-            const patientId = document.getElementById('assess-patient').value;
-            if(!patientId) return alert('กรุณาเลือกผู้สูงอายุก่อน');
-
-            const patient = allPatients.find(p => p.id === patientId);
-            const gender = patient ? patient.gender : 'ชาย';
-
-            const grip = parseFloat(document.getElementById('val-grip').value);
-            const calf = parseFloat(document.getElementById('val-calf').value);
-            const tug = parseFloat(document.getElementById('val-tug').value);
-            const sts = parseFloat(document.getElementById('val-sts').value);
-            const walk = parseFloat(document.getElementById('val-walk').value);
-
-            if(isNaN(grip) || isNaN(calf) || isNaN(tug) || isNaN(sts) || isNaN(walk)) {
-                return alert('กรุณากรอกข้อมูลตัวเลขทดสอบให้ครบถ้วน');
-            }
-
-            let riskIndicators = [];
-            let adviceList = [];
-
-            // 1. เกณฑ์แรงบีบมือ (Thai standard - AWGS 2019)
-            const gripCutoff = (gender === 'ชาย') ? 28 : 18;
-            if (grip < gripCutoff) {
-                riskIndicators.push('แรงบีบมือต่ำ');
-                adviceList.push(`- แนะนำฝึกเพิ่มความแข็งแรงของกล้ามเนื้อมือและแขน (Handgrip & Upper extremity exercises) เช่น บีบลูกบอลยาง หรือออกกำลังกายด้วยยางยืด อย่างน้อยวันละ 2 รอบ`);
-            }
-
-            // 2. เกณฑ์รอบน่อง (Thai standard)
-            const calfCutoff = (gender === 'ชาย') ? 34 : 31;
-            if (calf < calfCutoff) {
-                riskIndicators.push('รอบน่องต่ำกว่าเกณฑ์');
-                adviceList.push(`- พบภาวะเสี่ยงมวลกล้ามเนื้อน้อย (Sarcopenia Risk) แนะนำเน้นรับประทานอาหารประเภทโปรตีนคุณภาพสูง (เช่น ไข่ขาว, ปลา, นม) ให้เพียงพอ ร่วมกับการออกกำลังกายแบบมีแรงต้าน (Resistance training) ของรยางค์ล่างเพื่อสร้างมวลกล้ามเนื้อ`);
-            }
-
-            // 3. เกณฑ์ทดสอบทางกายภาพและความเสี่ยงล้ม
-            if (tug > 12) {
-                riskIndicators.push('TUG เสี่ยงล้ม');
-                adviceList.push('- ฝึกการทรงตัวขณะเคลื่อนไหว (Dynamic Balance) เช่น การเดินต่อส้นเท้า การเดินเปลี่ยนทิศทาง เพื่อลดความเสี่ยงหกล้ม');
-            }
-            if (sts > 12) {
-                riskIndicators.push('5xSTS อ่อนแรง');
-                adviceList.push('- เพิ่มความแข็งแรงกล้ามเนื้อต้นขา (Lower limb strength) แนะนำทำท่าลุกนั่งเก้าอี้ (Sit to stand) วันละ 3 เซ็ต เซ็ตละ 10 ครั้ง');
-            }
-            if (walk > 10) {
-                riskIndicators.push('ความเร็วเดินช้า');
-                adviceList.push('- ฝึกเพิ่มความทนทานและการเดิน (Gait & Endurance training) เช่น เดินเร็วต่อเนื่อง 15-20 นาที/วัน');
-            }
-
-            // สรุปผลความเสี่ยงรวม
-            let overallRisk = 'ต่ำ';
-            let finalAdvice = 'ผลสมรรถภาพทางกายโดยรวมอยู่ในเกณฑ์ปกติและดีเยี่ยม\n- แนะนำให้ออกกำลังกายเพื่อรักษาสมรรถภาพอย่างต่อเนื่อง (เช่น เดินเร็ว, ไทเก็ก, แกว่งแขน อย่างน้อย 150 นาที/สัปดาห์)\n- ป้องกันและจัดสิ่งแวดล้อมในบ้านให้ปลอดภัย เช่น ทางเดินสว่าง พื้นไม่ลื่น';
-
-            if (riskIndicators.length >= 3) {
-                overallRisk = 'สูง';
-                finalAdvice = '⚠️ ผู้สูงอายุอยู่ในระดับ [ความเสี่ยงหกล้มและมวลกล้ามเนื้อน้อยระดับสูง]\n' + adviceList.join('\n') + '\n- แนะนำให้พบแพทย์หรือนักกายภาพบำบัดเพื่อวางโปรแกรมอย่างใกล้ชิด และพิจารณาใช้อุปกรณ์ช่วยเดิน (Walking aids) ในช่วงนี้';
-            } else if (riskIndicators.length >= 1) {
-                overallRisk = 'ปานกลาง';
-                finalAdvice = 'ผู้สูงอายุมีความเสี่ยงระดับปานกลาง\n' + adviceList.join('\n');
-            }
-
-            document.getElementById('preview-risk').innerText = overallRisk;
-            document.getElementById('preview-risk').className = overallRisk === 'สูง' ? 'text-base font-bold text-danger' : (overallRisk === 'ปานกลาง' ? 'text-base font-bold text-warning' : 'text-base font-bold text-accent');
-            document.getElementById('val-recommendation').value = finalAdvice;
-            
-            document.getElementById('preview-result-box').classList.remove('hidden');
-        }
-
-        async function saveAssessment(e) {
-            e.preventDefault();
-            if(!supabaseClient) return;
-
-            if(document.getElementById('preview-result-box').classList.contains('hidden')) {
-                return alert('กรุณากดปุ่มประมวลผลคำแนะนำก่อนบันทึก');
-            }
-
-            const payload = {
-                patient_id: document.getElementById('assess-patient').value,
-                assessment_type: document.querySelector('input[name="assess_type"]:checked').value,
-                grip_strength_kg: document.getElementById('val-grip').value,
-                calf_circumference_cm: document.getElementById('val-calf').value,
-                tug_sec: document.getElementById('val-tug').value,
-                sts5_sec: document.getElementById('val-sts').value,
-                walk10m_sec: document.getElementById('val-walk').value,
-                overall_risk: document.getElementById('preview-risk').innerText,
-                recommendation: document.getElementById('val-recommendation').value,
-                created_by: currentUser.id
-            };
-
-            showLoader();
-            try {
-                const { error } = await supabaseClient.from('assessments').insert([payload]);
-                if (error) throw error;
-                showSuccess('บันทึกผลการประเมินสำเร็จ');
-                closeModal('modal-assessment');
-                loadAssessments();
-                if(!document.getElementById('view-dashboard').classList.contains('hidden')) loadDashboard();
-            } catch (err) { showError(err.message); } finally { hideLoader(); }
-        }
-
-        async function deleteAssessment(id) {
-            if(!confirm('ยืนยันการลบผลประเมินนี้?')) return;
-            showLoader();
-            try {
-                const { error } = await supabaseClient.from('assessments').delete().eq('id', id);
-                if (error) throw error;
-                showSuccess('ลบข้อมูลสำเร็จ');
-                loadAssessments();
-            } catch (err) { showError(err.message); } finally { hideLoader(); }
-        }
-
-        // --- 8. LINE Integration (Copy to Clipboard) ---
-        let currentLineMessage = "";
-        
-        function openLineModal(assessmentData) {
-            const pat = assessmentData.patients;
-            const isPre = assessmentData.assessment_type === 'pre' ? 'ก่อนการบำบัดรักษา' : 'หลังการบำบัดรักษา';
-            
-            const msg = `📋 รายงานผลสมรรถภาพทางกายและการคัดกรองความเสี่ยงล้ม\n\n👤 ชื่อ-สกุล: ${pat.prefix || ''}${pat.first_name} ${pat.last_name}\n📌 ช่วงการประเมิน: ${isPre}\n\n📊 ผลการทดสอบทางกายภาพ:\n- แรงบีบมือที่ถนัด (Grip strength): ${assessmentData.grip_strength_kg || '-'} กก.\n- เส้นรอบวงน่อง (Calf circumference): ${assessmentData.calf_circumference_cm || '-'} ซม.\n- TUG (ลุกเดิน): ${assessmentData.tug_sec || '-'} วินาที\n- 5xSTS (ลุกนั่ง 5 ครั้ง): ${assessmentData.sts5_sec || '-'} วินาที\n- 10m Walk (ความเร็วการเดิน): ${assessmentData.walk10m_sec || '-'} วินาที\n\n⚠️ สรุปผลความเสี่ยงรวม: *${assessmentData.overall_risk}*\n\n💡 คำแนะนำและการดูแลจากนักกายภาพบำบัด:\n${assessmentData.recommendation}\n\nด้วยความห่วงใยจากคลินิกกายภาพบำบัด 💙`;
-            
-            currentLineMessage = msg;
-            document.getElementById('line-message-content').innerText = msg;
-            openModal('modal-line');
-        }
-
         function copyToLine() {
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(currentLineMessage).then(() => {
-                    showSuccess("คัดลอกข้อความแล้ว นำไปวางส่งในแอป LINE ให้คนไข้ได้เลยครับ");
-                    closeModal('modal-line');
-                });
-            } else {
-                let textArea = document.createElement("textarea");
-                textArea.value = currentLineMessage;
-                textArea.style.position = "fixed";
-                document.body.appendChild(textArea);
-                textArea.focus();
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    showSuccess("คัดลอกข้อความแล้ว นำไปวางส่งในแอป LINE ได้เลยครับ");
-                    closeModal('modal-line');
-                } catch (err) { showError("ไม่สามารถคัดลอกได้อัตโนมัติ กรุณากดลากคลุมคัดลอกเอง"); }
-                document.body.removeChild(textArea);
-            }
+            navigator.clipboard.writeText(document.getElementById('line-content').innerText).then(()=>ui.ok("คัดลอกแล้ว"));
         }
-
-        // --- 9. Export Report to Excel (Includes New Fields) ---
+        async function delAss(id) { if(confirm("ลบ?")) { await supabaseClient.from('assessments').delete().eq('id',id); loadAssessments(); } }
+        async function loadDashboard() { 
+            document.getElementById('dash-list').innerHTML = allAssessments.slice(0,5).map(a => `<tr class="border-b"><td class="p-2">${new Date(a.created_at).toLocaleDateString('th')}</td><td class="p-2">${a.patients.first_name}</td><td class="p-2 text-${a.overall_risk==='สูง'?'red':'green'}-600">${a.overall_risk}</td></tr>`).join('');
+        }
         function exportReport() {
-            if(allAssessments.length === 0) return showError("ไม่มีข้อมูลสำหรับส่งออกรายงาน");
-            
-            const data = allAssessments.map(a => ({
-                'วันที่บันทึก': new Date(a.created_at).toLocaleDateString('th-TH'),
-                'รหัส HN': a.patients?.hn_code || '-',
-                'ชื่อ-สกุล': `${a.patients?.first_name || ''} ${a.patients?.last_name || ''}`,
-                'อายุ (ปี)': a.patients?.age || '-',
-                'เพศ': a.patients?.gender || '-',
-                'โรคประจำตัว': a.patients?.underlying_disease || '-',
-                'ระยะประเมิน': a.assessment_type === 'pre' ? 'ก่อนรักษา' : 'หลังรักษา',
-                'แรงบีบมือ (กก.)': a.grip_strength_kg,
-                'เส้นรอบวงน่อง (ซม.)': a.calf_circumference_cm,
-                'TUG (วินาที)': a.tug_sec,
-                '5STS (วินาที)': a.sts5_sec,
-                '10m Walk (วินาที)': a.walk10m_sec,
-                'ระดับความเสี่ยง': a.overall_risk,
-                'คำแนะนำนักกายภาพ': a.recommendation
-            }));
-
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Fall_Sarcopenia_Report");
-            
-            const fileName = `FallRisk_Report_v2_${new Date().toISOString().split('T')[0]}.xlsx`;
-            XLSX.writeFile(wb, fileName);
+            let d = allAssessments.map(a => ({ 'วันที่':new Date(a.created_at).toLocaleDateString('th'), 'ชื่อ':a.patients.first_name, 'MNA':a.mna_score, 'SARC-F':a.sarcf_score, 'OF-5':a.of5_score, 'EAT-10':a.eat10_score, 'ADL':a.adl_score, 'ผลรวม':a.recommendation }));
+            let ws = XLSX.utils.json_to_sheet(d); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Report");
+            XLSX.writeFile(wb, "CGA_Report.xlsx");
         }
-
-        window.onload = () => { checkAuth(); }
     </script>
 </body>
 </html>

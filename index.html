@@ -5,9 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบประเมินสุขภาพผู้สูงอายุแบบองค์รวม (CGA)</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.js"></script>
+    <!-- Tailwind CSS (ดึงผ่าน Play CDN เพื่อให้หน้าตาสวยงามแน่นอน 100%) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome & Google Fonts -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SweetAlert2, Supabase JS, SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
@@ -29,7 +34,7 @@
 
     <div id="loader"><div class="spinner mb-4"></div><p class="text-blue-900 font-semibold">กำลังประมวลผล...</p></div>
 
-    <!-- LOGIN -->
+    <!-- LOGIN VIEW -->
     <div id="login-view" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-blue-300 p-4">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
             <div class="text-center mb-6">
@@ -40,12 +45,12 @@
             <form onsubmit="handleLogin(event)">
                 <div class="mb-4"><label class="block text-sm font-bold mb-2">ชื่อผู้ใช้งาน</label><input type="text" id="username" class="w-full px-4 py-2 border rounded-lg" required></div>
                 <div class="mb-6"><label class="block text-sm font-bold mb-2">รหัสผ่าน</label><input type="password" id="password" class="w-full px-4 py-2 border rounded-lg" required></div>
-                <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-4 rounded-lg">เข้าสู่ระบบ</button>
+                <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-4 rounded-lg shadow-md">เข้าสู่ระบบ</button>
             </form>
         </div>
     </div>
 
-    <!-- MAIN APP -->
+    <!-- MAIN APP VIEW -->
     <div id="main-view" class="hidden h-screen flex flex-col md:flex-row overflow-hidden">
         
         <!-- Sidebar -->
@@ -72,7 +77,7 @@
                 <div id="view-dashboard" class="view-section hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold">Dashboard</h2>
-                        <button onclick="exportReport()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow text-sm"><i class="fa-solid fa-file-excel"></i> ส่งออกรายงาน</button>
+                        <button onclick="exportReport()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow text-sm font-semibold"><i class="fa-solid fa-file-excel"></i> ส่งออกรายงาน</button>
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow">
                         <p class="text-gray-500 mb-4">ระบบประเมิน 5 ด้าน และสมรรถภาพทางกาย</p>
@@ -85,7 +90,7 @@
                 <div id="view-patients" class="view-section hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold">ผู้สูงอายุ</h2>
-                        <button onclick="openPatientModal()" class="bg-blue-900 text-white px-4 py-2 rounded text-sm"><i class="fa-solid fa-plus"></i> เพิ่มข้อมูล</button>
+                        <button onclick="openPatientModal()" class="bg-blue-900 text-white px-4 py-2 rounded text-sm font-semibold"><i class="fa-solid fa-plus"></i> เพิ่มข้อมูล</button>
                     </div>
                     <div class="bg-white rounded-xl shadow overflow-hidden"><table class="w-full text-sm text-left"><thead class="bg-gray-100"><tr><th class="p-3">HN</th><th class="p-3">ชื่อ-สกุล</th><th class="p-3">อายุ/เพศ</th><th class="p-3">จัดการ</th></tr></thead><tbody id="patients-list"></tbody></table></div>
                 </div>
@@ -94,7 +99,7 @@
                 <div id="view-assessments" class="view-section hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold">ประเมินสมรรถภาพ</h2>
-                        <button onclick="openAssessmentModal()" class="bg-blue-900 text-white px-4 py-2 rounded text-sm"><i class="fa-solid fa-stethoscope"></i> เริ่มประเมิน</button>
+                        <button onclick="openAssessmentModal()" class="bg-blue-900 text-white px-4 py-2 rounded text-sm font-semibold"><i class="fa-solid fa-stethoscope"></i> เริ่มประเมิน</button>
                     </div>
                     <div class="bg-white rounded-xl shadow overflow-hidden"><table class="w-full text-sm text-left"><thead class="bg-gray-100"><tr><th class="p-3">วันที่</th><th class="p-3">ชื่อ</th><th class="p-3">สรุปผลรวม</th><th class="p-3 text-center">จัดการ</th></tr></thead><tbody id="assessments-list"></tbody></table></div>
                 </div>
@@ -109,8 +114,6 @@
         </nav>
     </div>
 
-    <!-- Modals -->
-    
     <!-- Patient Modal -->
     <div id="modal-patient" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl w-full max-w-lg p-4">
@@ -147,7 +150,6 @@
                     </div>
                 </div>
 
-                <!-- ... (MNA, SARC-F, OF-5, EAT-10, ADL form elements) ... -->
                 <details class="bg-white border rounded shadow-sm group">
                     <summary class="font-bold p-3 bg-blue-50 cursor-pointer flex justify-between items-center">
                         <span><i class="fa-solid fa-apple-whole text-red-500"></i> โภชนาการ (MNA-SF)</span>
@@ -400,10 +402,7 @@
             let physAdv = [];
             let interventions = [];
 
-            // --------------------------------------------------------
-            // 💡 1. แยกตรรกะ: การประเมินความเสี่ยงล้ม (Fall Risk)
-            // ประเมินจาก: TUG, 5xSTS, 10MWT เท่านั้น (ไม่เอา Grip/Calf มาปน)
-            // --------------------------------------------------------
+            // 1. แยกตรรกะ: การประเมินความเสี่ยงล้ม (Fall Risk)
             let isFallRisk = false; 
             if(tug > 0 && tug >= 12) {
                 physAdv.push(`[ทรงตัว] TUG: ${tug} วิ (เสี่ยงล้ม ≥ 12วิ)`);
@@ -421,10 +420,7 @@
             let fallRiskResult = isFallRisk ? "🚨 เสี่ยง (ต้องเฝ้าระวังการหกล้ม)" : "✅ ต่ำ/ปลอดภัย (เคลื่อนไหวคล่องตัว)";
             if(isFallRisk) interventions.push("ฝึกการทรงตัวและการเดิน (Balance & Gait Training) ป้องกันล้ม");
 
-            // --------------------------------------------------------
-            // 💡 2. แยกตรรกะ: การประเมินภาวะมวลกล้ามเนื้อน้อย (Sarcopenia)
-            // ประเมินจาก: Grip Strength และ Calf Circumference เท่านั้น
-            // --------------------------------------------------------
+            // 2. แยกตรรกะ: การประเมินภาวะมวลกล้ามเนื้อน้อย (Sarcopenia)
             let isSarcopeniaRisk = false;
             let passGrip = (patient.gender === 'ชาย') ? 28 : 18;
             if (grip > 0 && grip < passGrip) {

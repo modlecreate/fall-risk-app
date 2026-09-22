@@ -402,23 +402,37 @@
             let physAdv = [];
             let interventions = [];
 
-            // 1. แยกตรรกะ: การประเมินความเสี่ยงล้ม (Fall Risk)
-            let isFallRisk = false; 
+            // 1. แยกตรรกะ: การประเมินความเสี่ยงล้ม (Fall Risk) - แบ่ง 3 ระดับ
+            let fallRiskCount = 0;
             if(tug > 0 && tug >= 12) {
-                physAdv.push(`[ทรงตัว] TUG: ${tug} วิ (เสี่ยงล้ม ≥ 12วิ)`);
-                isFallRisk = true;
+                physAdv.push(`[ทรงตัว] TUG: ${tug} วิ (เสี่ยงล้ม >= 12วิ)`);
+                fallRiskCount++;
             }
             if(sts > 0 && sts >= 12) {
-                physAdv.push(`[ทรงตัว] 5xSTS: ${sts} วิ (กล้ามเนื้อขาอ่อนแรง ≥ 12วิ)`);
-                isFallRisk = true;
+                physAdv.push(`[ทรงตัว] 5xSTS: ${sts} วิ (กล้ามเนื้อขาอ่อนแรง >= 12วิ)`);
+                fallRiskCount++;
             }
             if(walkTime > 4.5) {
                 physAdv.push(`[ทรงตัว] 10MWT: เวลา ${walkTime} วิ (เดินช้า ความเร็ว ${walkSpeed} m/s)`);
-                isFallRisk = true;
+                fallRiskCount++;
             }
             
-            let fallRiskResult = isFallRisk ? "🚨 เสี่ยง (ต้องเฝ้าระวังการหกล้ม)" : "✅ ต่ำ/ปลอดภัย (เคลื่อนไหวคล่องตัว)";
-            if(isFallRisk) interventions.push("ฝึกการทรงตัวและการเดิน (Balance & Gait Training) ป้องกันล้ม");
+            let fallRiskResult = "";
+            let fallRiskLevel = "";
+            
+            if (fallRiskCount >= 2) {
+                fallRiskResult = "🚨 เสี่ยงสูง (High Risk) - ต้องเฝ้าระวังการหกล้มอย่างใกล้ชิด";
+                fallRiskLevel = "สูง";
+                interventions.push("แนะนำให้ใช้อุปกรณ์ช่วยเดิน (Mobility aids) หรือมีผู้ดูแลใกล้ชิด");
+                interventions.push("ฝึกการทรงตัวและการเดิน (Balance & Gait Training) อย่างเข้มข้น");
+            } else if (fallRiskCount === 1) {
+                fallRiskResult = "⚠️ เสี่ยงปานกลาง (Moderate Risk) - เริ่มมีความเสี่ยงหกล้ม";
+                fallRiskLevel = "ปานกลาง";
+                interventions.push("ฝึกการทรงตัวและการเดิน (Balance & Gait Training) เพื่อป้องกันการหกล้ม");
+            } else {
+                fallRiskResult = "✅ เสี่ยงต่ำ (Low Risk) - ปลอดภัย เคลื่อนไหวคล่องตัว";
+                fallRiskLevel = "ต่ำ";
+            }
 
             // 2. แยกตรรกะ: การประเมินภาวะมวลกล้ามเนื้อน้อย (Sarcopenia)
             let isSarcopeniaRisk = false;
@@ -443,7 +457,7 @@
             if(interventions.length === 0) interventions.push("ส่งเสริมการออกกำลังกายทั่วไปเพื่อรักษาสุขภาพ");
 
             // รวมสถานะความเสี่ยงแบบแยกส่วนสำหรับเก็บบลง Database
-            let overRisk = `ล้ม: ${isFallRisk?'สูง':'ต่ำ'} | กล้ามเนื้อ: ${isSarcopeniaRisk?'น้อย':'ปกติ'}`;
+            let overRisk = `ล้ม: ${fallRiskLevel} | กล้ามเนื้อ: ${isSarcopeniaRisk?'น้อย':'ปกติ'}`;
             calculatedScores = { mna_score:mnaScore, sarcf_score:sarcScore, of5_score:of5Score, eat10_score:eatScore, adl_score:adlScore, weight_kg:w, height_cm:h, overall_risk:overRisk };
 
             // สร้างข้อความรายงานผล

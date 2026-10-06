@@ -145,8 +145,8 @@
                         <div class="flex-1"><input type="radio" name="assess_type" id="type_post" value="post"><label for="type_post" class="text-center">หลังรักษา (Post)</label></div>
                     </div>
                     <div class="grid grid-cols-2 gap-2 mt-2">
-                        <input type="number" id="val-weight" step="0.1" placeholder="น้ำหนัก (กก.)" class="border p-2 rounded w-full">
-                        <input type="number" id="val-height" step="0.1" placeholder="ส่วนสูง (ซม.)" class="border p-2 rounded w-full">
+                        <input type="number" id="val-weight" step="0.1" placeholder="น้ำหนัก (กก.) (ไม่บังคับ)" class="border p-2 rounded w-full">
+                        <input type="number" id="val-height" step="0.1" placeholder="ส่วนสูง (ซม.) (ไม่บังคับ)" class="border p-2 rounded w-full">
                     </div>
                 </div>
 
@@ -195,21 +195,21 @@
 
                 <details class="bg-white border rounded shadow-sm group" open>
                     <summary class="font-bold p-3 bg-emerald-50 cursor-pointer flex justify-between items-center">
-                        <span><i class="fa-solid fa-person-running text-emerald-600"></i> สมรรถภาพทางกาย (แยกประเมินความเสี่ยงล้ม & กล้ามเนื้อน้อย)</span>
+                        <span><i class="fa-solid fa-person-running text-emerald-600"></i> สมรรถภาพทางกาย (ปล่อยว่างได้ถ้าไม่ได้ประเมิน)</span>
                         <i class="fa-solid fa-chevron-down"></i>
                     </summary>
                     <div class="p-3 border-t space-y-3 bg-gray-50">
                         <p class="text-xs text-red-600 font-bold mb-1"><i class="fa-solid fa-triangle-exclamation"></i> การประเมินทุนสำรอง/มวลกล้ามเนื้อ (Sarcopenia Risk)</p>
                         <div class="grid grid-cols-2 gap-3 mb-2">
-                            <div><label class="block text-xs font-bold mb-1">Grip Strength (กก.)</label><input type="number" id="val-grip" step="0.1" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เกณฑ์ AWGS: ชาย≥28, หญิง≥18</span></div>
-                            <div><label class="block text-xs font-bold mb-1">เส้นรอบวงน่อง (ซม.)</label><input type="number" id="val-calf" step="0.1" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เกณฑ์ AWGS: ชาย≥34, หญิง≥33</span></div>
+                            <div><label class="block text-xs font-bold mb-1">Grip Strength (กก.)</label><input type="number" id="val-grip" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">ชาย≥28, หญิง≥18</span></div>
+                            <div><label class="block text-xs font-bold mb-1">เส้นรอบวงน่อง (ซม.)</label><input type="number" id="val-calf" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">ชาย≥34, หญิง≥33</span></div>
                         </div>
                         <hr>
                         <p class="text-xs text-blue-600 font-bold mt-2 mb-1"><i class="fa-solid fa-person-falling"></i> การประเมินความสามารถในการทรงตัวและการเดิน (Fall Risk)</p>
                         <div class="grid grid-cols-2 gap-3">
-                            <div><label class="block text-xs font-bold mb-1">TUG (วินาที)</label><input type="number" id="val-tug" step="0.1" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เสี่ยงเมื่อ: ≥ 12 วิ</span></div>
-                            <div><label class="block text-xs font-bold mb-1">5xSTS (วินาที)</label><input type="number" id="val-sts" step="0.1" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เสี่ยงเมื่อ: ≥ 12 วิ</span></div>
-                            <div class="col-span-2"><label class="block text-xs font-bold mb-1">10MWT เวลาช่วง 4 เมตร (วินาที)</label><input type="number" id="val-walk" step="0.1" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เสี่ยงเมื่อ: > 4.5 วินาที</span></div>
+                            <div><label class="block text-xs font-bold mb-1">TUG (วินาที)</label><input type="number" id="val-tug" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เสี่ยงเมื่อ: ≥ 12 วิ</span></div>
+                            <div><label class="block text-xs font-bold mb-1">5xSTS (วินาที)</label><input type="number" id="val-sts" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เสี่ยงเมื่อ: ≥ 12 วิ</span></div>
+                            <div class="col-span-2"><label class="block text-xs font-bold mb-1">10MWT เวลาช่วง 4 เมตร (วินาที)</label><input type="number" id="val-walk" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เสี่ยงเมื่อ: > 4.5 วินาที</span></div>
                         </div>
                     </div>
                 </details>
@@ -367,16 +367,25 @@
             if(!pid) return ui.err("กรุณาเลือกชื่อผู้สูงอายุก่อนครับ");
             const patient = allPatients.find(p => p.id === pid);
             
-            // ข้อมูลพื้นฐาน
-            const w = parseFloat(document.getElementById('val-weight').value) || 0;
-            const h = parseFloat(document.getElementById('val-height').value) || 0;
+            // ข้อมูลพื้นฐาน (รับค่าว่างได้)
+            const wInput = document.getElementById('val-weight').value;
+            const w = wInput !== '' ? parseFloat(wInput) : null;
+            const hInput = document.getElementById('val-height').value;
+            const h = hInput !== '' ? parseFloat(hInput) : null;
             
             // คำนวณคะแนนแบบสอบถาม
             let mnaScore = parseInt(document.querySelector('input[name="mna_a"]:checked').value) + parseInt(document.querySelector('input[name="mna_b"]:checked').value) + parseInt(document.querySelector('input[name="mna_c"]:checked').value) + parseInt(document.querySelector('input[name="mna_d"]:checked').value) + parseInt(document.querySelector('input[name="mna_e"]:checked').value);
-            const calf = parseFloat(document.getElementById('val-calf').value) || 0;
-            let bmi = 0, mnaF = 0;
-            if(w>0 && h>0) { bmi = w / Math.pow(h/100, 2); if(bmi<19) mnaF=0; else if(bmi<21) mnaF=1; else if(bmi<23) mnaF=2; else mnaF=3; }
-            else { mnaF = (calf < 31) ? 0 : 3; }
+            
+            const calfInput = document.getElementById('val-calf').value;
+            const calf = calfInput !== '' ? parseFloat(calfInput) : null;
+
+            let mnaF = 0;
+            if(w !== null && h !== null && h > 0) { 
+                let bmi = w / Math.pow(h/100, 2); 
+                if(bmi<19) mnaF=0; else if(bmi<21) mnaF=1; else if(bmi<23) mnaF=2; else mnaF=3; 
+            } else if (calf !== null) { 
+                mnaF = (calf < 31) ? 0 : 3; 
+            }
             mnaScore += mnaF;
             let mnaRes = (mnaScore >= 12) ? "ปกติ" : (mnaScore >= 8) ? "เสี่ยงขาดสารอาหาร" : "ขาดสารอาหาร";
 
@@ -392,35 +401,56 @@
             let adlScore = 0; for(let i=1;i<=10;i++) adlScore += parseInt(document.querySelector(`input[name="adl_${i}"]:checked`).value);
             let adlRes = (adlScore >= 12) ? "ติดสังคม" : (adlScore >= 5) ? "ติดบ้าน" : "ติดเตียง";
 
-            // สมรรถภาพทางกาย (Physical Performance)
-            const grip = parseFloat(document.getElementById('val-grip').value) || 0;
-            const tug = parseFloat(document.getElementById('val-tug').value) || 0;
-            const sts = parseFloat(document.getElementById('val-sts').value) || 0;
-            const walkTime = parseFloat(document.getElementById('val-walk').value) || 0;
-            let walkSpeed = (walkTime > 0) ? (4.0 / walkTime).toFixed(2) : 0;
+            // สมรรถภาพทางกาย (รับค่าว่างได้)
+            const gripInput = document.getElementById('val-grip').value;
+            const grip = gripInput !== '' ? parseFloat(gripInput) : null;
+            
+            const tugInput = document.getElementById('val-tug').value;
+            const tug = tugInput !== '' ? parseFloat(tugInput) : null;
+            
+            const stsInput = document.getElementById('val-sts').value;
+            const sts = stsInput !== '' ? parseFloat(stsInput) : null;
+            
+            const walkInput = document.getElementById('val-walk').value;
+            const walkTime = walkInput !== '' ? parseFloat(walkInput) : null;
 
             let physAdv = [];
             let interventions = [];
 
-            // 1. แยกตรรกะ: การประเมินความเสี่ยงล้ม (Fall Risk) - แบ่ง 3 ระดับ
+            // 1. แยกตรรกะ: การประเมินความเสี่ยงล้ม (Fall Risk) - ตรวจสอบเฉพาะช่องที่กรอก
             let fallRiskCount = 0;
-            if(tug > 0 && tug >= 12) {
-                physAdv.push(`[ทรงตัว] TUG: ${tug} วิ (เสี่ยงล้ม >= 12วิ)`);
-                fallRiskCount++;
+            let fallRiskAssessed = 0; // นับจำนวนแบบทดสอบที่ถูกประเมินจริง
+
+            if(tug !== null) {
+                fallRiskAssessed++;
+                if(tug >= 12) {
+                    physAdv.push(`[ทรงตัว] TUG: ${tug} วิ (เสี่ยงล้ม >= 12วิ)`);
+                    fallRiskCount++;
+                }
             }
-            if(sts > 0 && sts >= 12) {
-                physAdv.push(`[ทรงตัว] 5xSTS: ${sts} วิ (กล้ามเนื้อขาอ่อนแรง >= 12วิ)`);
-                fallRiskCount++;
+            if(sts !== null) {
+                fallRiskAssessed++;
+                if(sts >= 12) {
+                    physAdv.push(`[ทรงตัว] 5xSTS: ${sts} วิ (กล้ามเนื้อขาอ่อนแรง >= 12วิ)`);
+                    fallRiskCount++;
+                }
             }
-            if(walkTime > 4.5) {
-                physAdv.push(`[ทรงตัว] 10MWT: เวลา ${walkTime} วิ (เดินช้า ความเร็ว ${walkSpeed} m/s)`);
-                fallRiskCount++;
+            if(walkTime !== null) {
+                fallRiskAssessed++;
+                let walkSpeed = (walkTime > 0) ? (4.0 / walkTime).toFixed(2) : 0;
+                if(walkTime > 4.5) {
+                    physAdv.push(`[ทรงตัว] 10MWT: เวลา ${walkTime} วิ (เดินช้า ความเร็ว ${walkSpeed} m/s)`);
+                    fallRiskCount++;
+                }
             }
             
             let fallRiskResult = "";
             let fallRiskLevel = "";
             
-            if (fallRiskCount >= 2) {
+            if (fallRiskAssessed === 0) {
+                fallRiskResult = "⚪ ไม่ได้ประเมิน (เว้นว่างไว้)";
+                fallRiskLevel = "-";
+            } else if (fallRiskCount >= 2) {
                 fallRiskResult = "🚨 เสี่ยงสูง (High Risk) - ต้องเฝ้าระวังการหกล้มอย่างใกล้ชิด";
                 fallRiskLevel = "สูง";
                 interventions.push("แนะนำให้ใช้อุปกรณ์ช่วยเดิน (Mobility aids) หรือมีผู้ดูแลใกล้ชิด");
@@ -436,19 +466,35 @@
 
             // 2. แยกตรรกะ: การประเมินภาวะมวลกล้ามเนื้อน้อย (Sarcopenia)
             let isSarcopeniaRisk = false;
-            let passGrip = (patient.gender === 'ชาย') ? 28 : 18;
-            if (grip > 0 && grip < passGrip) {
-                physAdv.push(`[กล้ามเนื้อ] Grip Strength: ${grip} กก. (ต่ำกว่าเกณฑ์ ${passGrip} กก.)`);
-                isSarcopeniaRisk = true;
+            let sarcopeniaAssessed = 0;
+
+            if (grip !== null) {
+                sarcopeniaAssessed++;
+                let passGrip = (patient.gender === 'ชาย') ? 28 : 18;
+                if (grip < passGrip) {
+                    physAdv.push(`[กล้ามเนื้อ] Grip Strength: ${grip} กก. (ต่ำกว่าเกณฑ์ ${passGrip} กก.)`);
+                    isSarcopeniaRisk = true;
+                }
             }
-            let passCalf = (patient.gender === 'ชาย') ? 34 : 33;
-            if (calf > 0 && calf < passCalf) {
-                 physAdv.push(`[กล้ามเนื้อ] รอบน่อง: ${calf} ซม. (ต่ำกว่าเกณฑ์ ${passCalf} ซม.)`);
-                 isSarcopeniaRisk = true;
+            if (calf !== null) {
+                sarcopeniaAssessed++;
+                let passCalf = (patient.gender === 'ชาย') ? 34 : 33;
+                if (calf < passCalf) {
+                     physAdv.push(`[กล้ามเนื้อ] รอบน่อง: ${calf} ซม. (ต่ำกว่าเกณฑ์ ${passCalf} ซม.)`);
+                     isSarcopeniaRisk = true;
+                }
             }
 
-            let sarcopeniaResult = isSarcopeniaRisk ? "⚠️ เสี่ยงมวลกล้ามเนื้อน้อย (ทุนสำรองร่างกายต่ำ)" : "✅ ปกติ (มวลกล้ามเนื้อดี)";
-            if(isSarcopeniaRisk) interventions.push("เวทเทรนนิ่งเพิ่มมวลกล้ามเนื้อ (Resistance Training) และเสริมโปรตีน");
+            let sarcopeniaResult = "";
+            let sarcLevel = "";
+            if (sarcopeniaAssessed === 0) {
+                sarcopeniaResult = "⚪ ไม่ได้ประเมิน (เว้นว่างไว้)";
+                sarcLevel = "-";
+            } else {
+                sarcopeniaResult = isSarcopeniaRisk ? "⚠️ เสี่ยงมวลกล้ามเนื้อน้อย (ทุนสำรองร่างกายต่ำ)" : "✅ ปกติ (มวลกล้ามเนื้อดี)";
+                sarcLevel = isSarcopeniaRisk ? 'น้อย' : 'ปกติ';
+                if(isSarcopeniaRisk) interventions.push("เวทเทรนนิ่งเพิ่มมวลกล้ามเนื้อ (Resistance Training) และเสริมโปรตีน");
+            }
 
             // จัดการคำแนะนำอื่นๆ
             if(mnaScore < 12) interventions.push("ให้คำแนะนำด้านโภชนาการเพิ่มเติม");
@@ -456,9 +502,12 @@
             if(adlScore < 12) interventions.push("ปรับสภาพแวดล้อมที่อยู่อาศัย");
             if(interventions.length === 0) interventions.push("ส่งเสริมการออกกำลังกายทั่วไปเพื่อรักษาสุขภาพ");
 
-            // รวมสถานะความเสี่ยงแบบแยกส่วนสำหรับเก็บบลง Database
-            let overRisk = `ล้ม: ${fallRiskLevel} | กล้ามเนื้อ: ${isSarcopeniaRisk?'น้อย':'ปกติ'}`;
-            calculatedScores = { mna_score:mnaScore, sarcf_score:sarcScore, of5_score:of5Score, eat10_score:eatScore, adl_score:adlScore, weight_kg:w, height_cm:h, overall_risk:overRisk };
+            // รวมสถานะความเสี่ยงแบบแยกส่วนสำหรับเก็บลง Database
+            let overRisk = `ล้ม: ${fallRiskLevel} | กล้ามเนื้อ: ${sarcLevel}`;
+            calculatedScores = { 
+                mna_score: mnaScore, sarcf_score: sarcScore, of5_score: of5Score, eat10_score: eatScore, adl_score: adlScore, 
+                weight_kg: w, height_cm: h, overall_risk: overRisk 
+            };
 
             // สร้างข้อความรายงานผล
             let report = `📋 สรุปผลประเมินสุขภาพ (CGA)\n👤 คนไข้: ${patient.prefix}${patient.first_name} ${patient.last_name} (${patient.gender})\n\n`;
@@ -486,8 +535,14 @@
             if(document.getElementById('preview-result-box').classList.contains('hidden')) return ui.err("กรุณากดประมวลผลคะแนนก่อนบันทึกครับ");
             ui.loader();
             let p = {
-                patient_id: document.getElementById('assess-patient').value, assessment_type: document.querySelector('input[name="assess_type"]:checked').value,
-                recommendation: document.getElementById('val-recommendation').value, tug_sec: document.getElementById('val-tug').value||0, sts5_sec: document.getElementById('val-sts').value||0, walk10m_sec: document.getElementById('val-walk').value||0, grip_strength_kg: document.getElementById('val-grip').value||0, calf_circumference_cm: document.getElementById('val-calf').value||0,
+                patient_id: document.getElementById('assess-patient').value, 
+                assessment_type: document.querySelector('input[name="assess_type"]:checked').value,
+                recommendation: document.getElementById('val-recommendation').value, 
+                tug_sec: document.getElementById('val-tug').value || null, 
+                sts5_sec: document.getElementById('val-sts').value || null, 
+                walk10m_sec: document.getElementById('val-walk').value || null, 
+                grip_strength_kg: document.getElementById('val-grip').value || null, 
+                calf_circumference_cm: document.getElementById('val-calf').value || null,
                 created_by: currentUser.id
             };
             Object.assign(p, calculatedScores);
@@ -522,8 +577,27 @@
         function exportReport() {
             if(!allAssessments.length) return ui.err("ไม่มีข้อมูลให้ส่งออก");
             let d = allAssessments.map(a => {
-                let speed = (a.walk10m_sec > 0) ? (4.0 / a.walk10m_sec).toFixed(2) : 0;
-                return { 'วันที่':new Date(a.created_at).toLocaleDateString('th'), 'ชื่อ-สกุล':a.patients.first_name+' '+a.patients.last_name, 'น้ำหนัก':a.weight_kg, 'ส่วนสูง':a.height_cm, 'MNA':a.mna_score, 'SARC-F':a.sarcf_score, 'OF-5':a.of5_score, 'EAT-10':a.eat10_score, 'ADL':a.adl_score, 'Grip':a.grip_strength_kg, 'Calf':a.calf_circumference_cm, 'TUG (วิ)':a.tug_sec, '5STS (วิ)':a.sts5_sec, '10MWT เวลา (วิ)':a.walk10m_sec, 'ความเร็วเดิน (m/s)':speed, 'ความเสี่ยง (ล้ม|กล้ามเนื้อ)':a.overall_risk, 'คำแนะนำ':a.recommendation };
+                let walk10m = parseFloat(a.walk10m_sec);
+                let speed = (walk10m > 0) ? (4.0 / walk10m).toFixed(2) : '-';
+                return { 
+                    'วันที่': new Date(a.created_at).toLocaleDateString('th'), 
+                    'ชื่อ-สกุล': a.patients.first_name+' '+a.patients.last_name, 
+                    'น้ำหนัก': a.weight_kg || '-', 
+                    'ส่วนสูง': a.height_cm || '-', 
+                    'MNA': a.mna_score, 
+                    'SARC-F': a.sarcf_score, 
+                    'OF-5': a.of5_score, 
+                    'EAT-10': a.eat10_score, 
+                    'ADL': a.adl_score, 
+                    'Grip': a.grip_strength_kg !== null ? a.grip_strength_kg : '-', 
+                    'Calf': a.calf_circumference_cm !== null ? a.calf_circumference_cm : '-', 
+                    'TUG (วิ)': a.tug_sec !== null ? a.tug_sec : '-', 
+                    '5STS (วิ)': a.sts5_sec !== null ? a.sts5_sec : '-', 
+                    '10MWT เวลา (วิ)': a.walk10m_sec !== null ? a.walk10m_sec : '-', 
+                    'ความเร็วเดิน (m/s)': speed, 
+                    'ความเสี่ยง (ล้ม|กล้ามเนื้อ)': a.overall_risk, 
+                    'คำแนะนำ': a.recommendation 
+                };
             });
             let ws = XLSX.utils.json_to_sheet(d); let wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "CGA_Report");
             XLSX.writeFile(wb, `CGA_Report_${new Date().toISOString().split('T')[0]}.xlsx`);

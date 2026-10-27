@@ -209,7 +209,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div><label class="block text-xs font-bold mb-1">TUG (วินาที)</label><input type="number" id="val-tug" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เสี่ยงเมื่อ: ≥ 12 วิ</span></div>
                             <div><label class="block text-xs font-bold mb-1">5xSTS (วินาที)</label><input type="number" id="val-sts" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เสี่ยงเมื่อ: ≥ 12 วิ</span></div>
-                            <div class="col-span-2"><label class="block text-xs font-bold mb-1">10MWT เวลาช่วง 4 เมตร (วินาที)</label><input type="number" id="val-walk" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เสี่ยงเมื่อ: > 4.5 วินาที</span></div>
+                            <div class="col-span-2"><label class="block text-xs font-bold mb-1">10MWT เวลาช่วง 10 เมตร (วินาที)</label><input type="number" id="val-walk" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">ความเร็ว < 1.0 m/s ถือว่าเสี่ยงล้ม</span></div>
                         </div>
                     </div>
                 </details>
@@ -217,7 +217,7 @@
                 <div class="bg-yellow-50 p-3 rounded border border-yellow-300">
                     <button type="button" onclick="calculateScores()" class="w-full bg-blue-600 text-white py-2 rounded shadow hover:bg-blue-700 font-bold mb-2"><i class="fa-solid fa-calculator"></i> ประมวลผลคะแนนแยกความเสี่ยง</button>
                     <div id="preview-result-box" class="hidden">
-                        <textarea id="val-recommendation" rows="11" class="w-full border rounded p-2 text-xs bg-white focus:outline-none"></textarea>
+                        <textarea id="val-recommendation" rows="13" class="w-full border rounded p-2 text-xs bg-white focus:outline-none"></textarea>
                     </div>
                 </div>
 
@@ -417,9 +417,10 @@
             let physAdv = [];
             let interventions = [];
 
-            // 1. แยกตรรกะ: การประเมินความเสี่ยงล้ม (Fall Risk) - ตรวจสอบเฉพาะช่องที่กรอก
+            // 1. แยกตรรกะ: การประเมินความเสี่ยงล้ม (Fall Risk)
             let fallRiskCount = 0;
-            let fallRiskAssessed = 0; // นับจำนวนแบบทดสอบที่ถูกประเมินจริง
+            let fallRiskAssessed = 0; 
+            let walkSpeedInterpretation = "";
 
             if(tug !== null) {
                 fallRiskAssessed++;
@@ -428,6 +429,7 @@
                     fallRiskCount++;
                 }
             }
+            
             if(sts !== null) {
                 fallRiskAssessed++;
                 if(sts >= 12) {
@@ -435,11 +437,28 @@
                     fallRiskCount++;
                 }
             }
-            if(walkTime !== null) {
+            
+            // ประมวลผล 10MWT ตามเกณฑ์ความเร็ว
+            if(walkTime !== null && walkTime > 0) {
                 fallRiskAssessed++;
-                let walkSpeed = (walkTime > 0) ? (4.0 / walkTime).toFixed(2) : 0;
-                if(walkTime > 4.5) {
-                    physAdv.push(`[ทรงตัว] 10MWT: เวลา ${walkTime} วิ (เดินช้า ความเร็ว ${walkSpeed} m/s)`);
+                let walkSpeed = parseFloat((10.0 / walkTime).toFixed(2));
+                
+                // แปลผลและสร้างข้อความสำหรับรายงาน
+                if (walkSpeed < 0.4) {
+                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินได้เฉพาะในบ้าน, เสี่ยงหกล้ม)`;
+                } else if (walkSpeed <= 0.8) {
+                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินได้ในชุมชนแบบจำกัด, เสี่ยงหกล้ม)`;
+                } else if (walkSpeed < 1.0) {
+                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินในชุมชนได้, แต่เป็นสัญญาณเตือนเสี่ยงล้ม)`;
+                } else if (walkSpeed < 1.2) {
+                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินในชุมชนได้ปลอดภัย)`;
+                } else {
+                    walkSpeedInterpretation = `${walkSpeed} m/s (สามารถข้ามถนนได้ทันสัญญาณไฟ, ปลอดภัย)`;
+                }
+
+                // นำเข้า physAdv (จุดผิดปกติ) กรณีที่ต่ำกว่า 1.0 m/s
+                if(walkSpeed < 1.0) {
+                    physAdv.push(`[ทรงตัว] 10MWT: ความเร็ว ${walkSpeedInterpretation}`);
                     fallRiskCount++;
                 }
             }
@@ -509,13 +528,19 @@
                 weight_kg: w, height_cm: h, overall_risk: overRisk 
             };
 
-            // สร้างข้อความรายงานผล
+            // สร้างข้อความรายงานผลสำหรับนำไปวางใน LINE
             let report = `📋 สรุปผลประเมินสุขภาพ (CGA)\n👤 คนไข้: ${patient.prefix}${patient.first_name} ${patient.last_name} (${patient.gender})\n\n`;
             report += `[ สรุปสมรรถภาพทางกาย ]\n`;
             report += `🏃 ความเสี่ยงล้ม (Fall Risk)    : ${fallRiskResult}\n`;
+            
+            // แทรกผลการเดินโดยเฉพาะ (ถ้ามีการกรอกค่า 10MWT)
+            if (walkSpeedInterpretation !== "") {
+                report += `🚶 ประสิทธิภาพการเดิน (10MWT): ${walkSpeedInterpretation}\n`;
+            }
+
             report += `💪 ภาวะกล้ามเนื้อ (Sarcopenia): ${sarcopeniaResult}\n`;
             
-            if(physAdv.length>0) {
+            if(physAdv.length > 0) {
                 report += `\n[ จุดที่พบความผิดปกติ ]\n` + physAdv.map(x=>"• "+x).join('\n') + `\n`;
             }
 
@@ -578,7 +603,7 @@
             if(!allAssessments.length) return ui.err("ไม่มีข้อมูลให้ส่งออก");
             let d = allAssessments.map(a => {
                 let walk10m = parseFloat(a.walk10m_sec);
-                let speed = (walk10m > 0) ? (4.0 / walk10m).toFixed(2) : '-';
+                let speed = (walk10m > 0) ? (10.0 / walk10m).toFixed(2) : '-';
                 return { 
                     'วันที่': new Date(a.created_at).toLocaleDateString('th'), 
                     'ชื่อ-สกุล': a.patients.first_name+' '+a.patients.last_name, 

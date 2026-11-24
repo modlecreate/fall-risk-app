@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบประเมินสุขภาพผู้สูงอายุแบบองค์รวม (CGA)</title>
     
-    <!-- Tailwind CSS (ดึงผ่าน Play CDN เพื่อให้หน้าตาสวยงามแน่นอน 100%) -->
+    <!-- Tailwind CSS (ดึงผ่าน Play CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- FontAwesome & Google Fonts -->
@@ -82,7 +82,7 @@
                     <div class="bg-white p-6 rounded-xl shadow">
                         <p class="text-gray-500 mb-4">ระบบประเมิน 5 ด้าน และสมรรถภาพทางกาย</p>
                         <h3 class="font-bold mb-2">ประวัติการประเมินล่าสุด</h3>
-                        <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-gray-100"><tr><th class="p-2">วันที่</th><th class="p-2">ชื่อ</th><th class="p-2">ผลประเมินร่างกาย</th></tr></thead><tbody id="dash-list"></tbody></table></div>
+                        <div class="overflow-x-auto"><table class="w-full text-sm text-left"><thead class="bg-gray-100"><tr><th class="p-2">วันที่</th><th class="p-2">ชื่อ</th><th class="p-2">ครั้งที่</th><th class="p-2">ผลประเมินร่างกาย</th></tr></thead><tbody id="dash-list"></tbody></table></div>
                     </div>
                 </div>
 
@@ -101,7 +101,7 @@
                         <h2 class="text-2xl font-bold">ประเมินสมรรถภาพ</h2>
                         <button onclick="openAssessmentModal()" class="bg-blue-900 text-white px-4 py-2 rounded text-sm font-semibold"><i class="fa-solid fa-stethoscope"></i> เริ่มประเมิน</button>
                     </div>
-                    <div class="bg-white rounded-xl shadow overflow-hidden"><table class="w-full text-sm text-left"><thead class="bg-gray-100"><tr><th class="p-3">วันที่</th><th class="p-3">ชื่อ</th><th class="p-3">สรุปผลรวม</th><th class="p-3 text-center">จัดการ</th></tr></thead><tbody id="assessments-list"></tbody></table></div>
+                    <div class="bg-white rounded-xl shadow overflow-hidden"><table class="w-full text-sm text-left"><thead class="bg-gray-100"><tr><th class="p-3">วันที่</th><th class="p-3">ชื่อ</th><th class="p-3">ครั้งที่</th><th class="p-3">สรุปผลรวม</th><th class="p-3 text-center">จัดการ</th></tr></thead><tbody id="assessments-list"></tbody></table></div>
                 </div>
             </div>
         </main>
@@ -138,12 +138,26 @@
             
             <div class="p-4 overflow-y-auto flex-1 text-sm space-y-4">
                 <div class="bg-white p-3 rounded shadow-sm border border-gray-200">
-                    <label class="font-bold text-blue-900 block mb-1">1. เลือกผู้สูงอายุ & ข้อมูลพื้นฐาน</label>
-                    <select id="assess-patient" required class="w-full border p-2 rounded mb-2 bg-blue-50"></select>
-                    <div class="flex gap-2 radio-card">
-                        <div class="flex-1"><input type="radio" name="assess_type" id="type_pre" value="pre" checked><label for="type_pre" class="text-center">ก่อนรักษา (Pre)</label></div>
-                        <div class="flex-1"><input type="radio" name="assess_type" id="type_post" value="post"><label for="type_post" class="text-center">หลังรักษา (Post)</label></div>
+                    <label class="font-bold text-blue-900 block mb-1">1. เลือกผู้สูงอายุ & ครั้งที่ประเมิน</label>
+                    <select id="assess-patient" onchange="autoSelectVisit()" required class="w-full border p-2 rounded mb-2 bg-blue-50"></select>
+                    
+                    <div class="flex items-center gap-2 mb-2">
+                        <label class="text-xs font-bold text-gray-700 whitespace-nowrap">ครั้งที่ประเมิน:</label>
+                        <select id="assess-type" class="border p-2 rounded flex-1 bg-white font-semibold text-blue-900">
+                            <option value="ครั้งที่ 1">ครั้งที่ 1</option>
+                            <option value="ครั้งที่ 2">ครั้งที่ 2</option>
+                            <option value="ครั้งที่ 3">ครั้งที่ 3</option>
+                            <option value="ครั้งที่ 4">ครั้งที่ 4</option>
+                            <option value="ครั้งที่ 5">ครั้งที่ 5</option>
+                            <option value="ครั้งที่ 6">ครั้งที่ 6</option>
+                            <option value="ครั้งที่ 7">ครั้งที่ 7</option>
+                            <option value="ครั้งที่ 8">ครั้งที่ 8</option>
+                            <option value="ครั้งที่ 9">ครั้งที่ 9</option>
+                            <option value="ครั้งที่ 10">ครั้งที่ 10</option>
+                        </select>
+                        <span id="visit-history-badge" class="text-[11px] text-blue-600 bg-blue-50 px-2 py-1 rounded hidden"></span>
                     </div>
+
                     <div class="grid grid-cols-2 gap-2 mt-2">
                         <input type="number" id="val-weight" step="0.1" placeholder="น้ำหนัก (กก.) (ไม่บังคับ)" class="border p-2 rounded w-full">
                         <input type="number" id="val-height" step="0.1" placeholder="ส่วนสูง (ซม.) (ไม่บังคับ)" class="border p-2 rounded w-full">
@@ -209,7 +223,7 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div><label class="block text-xs font-bold mb-1">TUG (วินาที)</label><input type="number" id="val-tug" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เสี่ยงเมื่อ: ≥ 12 วิ</span></div>
                             <div><label class="block text-xs font-bold mb-1">5xSTS (วินาที)</label><input type="number" id="val-sts" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">เสี่ยงเมื่อ: ≥ 12 วิ</span></div>
-                            <div class="col-span-2"><label class="block text-xs font-bold mb-1">10MWT เวลาช่วง 10 เมตร (วินาที)</label><input type="number" id="val-walk" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">ความเร็ว < 1.0 m/s ถือว่าเสี่ยงล้ม</span></div>
+                            <div class="col-span-2"><label class="block text-xs font-bold mb-1">10MWT เวลาช่วง 4 เมตร (วินาที)</label><input type="number" id="val-walk" step="0.1" placeholder="ว่างได้" class="border p-2 w-full rounded focus:ring-2 focus:ring-emerald-400 focus:outline-none"><span class="text-[10px] text-gray-500">ความเร็ว < 1.0 m/s ถือว่าเสี่ยงล้ม</span></div>
                         </div>
                     </div>
                 </details>
@@ -300,12 +314,12 @@
             ok: (m) => Swal.fire({icon:'success', title:'สำเร็จ', text:m, timer:1500, showConfirmButton:false})
         };
 
-        function navigate(v) {
+        async function navigate(v) {
             document.querySelectorAll('.view-section').forEach(e => e.classList.add('hidden'));
             document.getElementById('view-'+v).classList.remove('hidden');
-            if(v === 'patients') loadPatients();
-            if(v === 'assessments') loadAssessments();
-            if(v === 'dashboard') loadDashboard();
+            if(v === 'patients') await loadPatients();
+            if(v === 'assessments') { await loadPatients(); await loadAssessments(); }
+            if(v === 'dashboard') { await loadAssessments(); loadDashboard(); }
         }
 
         async function handleLogin(e) {
@@ -355,9 +369,41 @@
             if(!allPatients.length) return ui.err("กรุณาเพิ่มข้อมูลผู้สูงอายุก่อนครับ");
             document.getElementById('preview-result-box').classList.add('hidden');
             document.getElementById('modal-assessment').classList.remove('hidden');
+            document.getElementById('assess-patient').value = '';
+            document.getElementById('assess-type').value = 'ครั้งที่ 1';
+            document.getElementById('visit-history-badge').classList.add('hidden');
             document.getElementById('val-grip').value = ''; document.getElementById('val-calf').value = '';
             document.getElementById('val-tug').value = ''; document.getElementById('val-sts').value = ''; document.getElementById('val-walk').value = '';
             document.getElementById('val-weight').value = ''; document.getElementById('val-height').value = '';
+        }
+
+        // ฟังก์ชันนับครั้งที่ประเมินให้อัตโนมัติเมื่อเลือกคนไข้เดิม
+        function autoSelectVisit() {
+            const pid = document.getElementById('assess-patient').value;
+            const badge = document.getElementById('visit-history-badge');
+            const selectEl = document.getElementById('assess-type');
+            
+            if (!pid) {
+                badge.classList.add('hidden');
+                selectEl.value = 'ครั้งที่ 1';
+                return;
+            }
+
+            const prevCount = allAssessments.filter(a => a.patient_id === pid).length;
+            const nextVisit = prevCount + 1;
+            const nextLabel = `ครั้งที่ ${nextVisit}`;
+
+            // ถ้าเกิน 10 ครั้ง ให้เพิ่มตัวเลือกเข้าไปอัตโนมัติ
+            if (!Array.from(selectEl.options).some(opt => opt.value === nextLabel)) {
+                const newOpt = document.createElement('option');
+                newOpt.value = nextLabel;
+                newOpt.text = nextLabel;
+                selectEl.add(newOpt);
+            }
+            selectEl.value = nextLabel;
+
+            badge.innerText = prevCount > 0 ? `เคยประเมินแล้ว ${prevCount} ครั้ง` : `ประเมินครั้งแรก`;
+            badge.classList.remove('hidden');
         }
 
         let calculatedScores = {};
@@ -366,6 +412,7 @@
             const pid = document.getElementById('assess-patient').value;
             if(!pid) return ui.err("กรุณาเลือกชื่อผู้สูงอายุก่อนครับ");
             const patient = allPatients.find(p => p.id === pid);
+            const visitLabel = document.getElementById('assess-type').value;
             
             // ข้อมูลพื้นฐาน (รับค่าว่างได้)
             const wInput = document.getElementById('val-weight').value;
@@ -438,25 +485,23 @@
                 }
             }
             
-            // ประมวลผล 10MWT ตามเกณฑ์ความเร็ว
+            // ประมวลผล 10MWT ตามเกณฑ์ความเร็ว (ใช้ 4 เมตร)
             if(walkTime !== null && walkTime > 0) {
                 fallRiskAssessed++;
-                let walkSpeed = parseFloat((10.0 / walkTime).toFixed(2));
+                let walkSpeed = parseFloat((4.0 / walkTime).toFixed(2));
                 
-                // แปลผลและสร้างข้อความสำหรับรายงาน
                 if (walkSpeed < 0.4) {
-                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินได้เฉพาะในบ้าน, เสี่ยงหกล้ม)`;
+                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินได้เฉพาะในบ้าน (household ambulator) / เป็นสัญญาณเตือนความเสี่ยงต่อการหกล้ม)`;
                 } else if (walkSpeed <= 0.8) {
-                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินได้ในชุมชนแบบจำกัด, เสี่ยงหกล้ม)`;
+                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินได้ในชุมชนแบบจำกัด / เป็นสัญญาณเตือนความเสี่ยงต่อการหกล้ม)`;
                 } else if (walkSpeed < 1.0) {
-                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินในชุมชนได้, แต่เป็นสัญญาณเตือนเสี่ยงล้ม)`;
+                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินในชุมชนได้ / แต่เป็นสัญญาณเตือนความเสี่ยงต่อการหกล้ม)`;
                 } else if (walkSpeed < 1.2) {
-                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินในชุมชนได้ปลอดภัย)`;
+                    walkSpeedInterpretation = `${walkSpeed} m/s (เดินในชุมชนได้ / ความเร็วปกติ)`;
                 } else {
-                    walkSpeedInterpretation = `${walkSpeed} m/s (สามารถข้ามถนนได้ทันสัญญาณไฟ, ปลอดภัย)`;
+                    walkSpeedInterpretation = `${walkSpeed} m/s (สามารถข้ามถนนได้ทันสัญญาณไฟ / ปลอดภัย)`;
                 }
 
-                // นำเข้า physAdv (จุดผิดปกติ) กรณีที่ต่ำกว่า 1.0 m/s
                 if(walkSpeed < 1.0) {
                     physAdv.push(`[ทรงตัว] 10MWT: ความเร็ว ${walkSpeedInterpretation}`);
                     fallRiskCount++;
@@ -529,11 +574,10 @@
             };
 
             // สร้างข้อความรายงานผลสำหรับนำไปวางใน LINE
-            let report = `📋 สรุปผลประเมินสุขภาพ (CGA)\n👤 คนไข้: ${patient.prefix}${patient.first_name} ${patient.last_name} (${patient.gender})\n\n`;
+            let report = `📋 สรุปผลประเมินสุขภาพ (CGA) - ${visitLabel}\n👤 คนไข้: ${patient.prefix}${patient.first_name} ${patient.last_name} (${patient.gender})\n\n`;
             report += `[ สรุปสมรรถภาพทางกาย ]\n`;
             report += `🏃 ความเสี่ยงล้ม (Fall Risk)    : ${fallRiskResult}\n`;
             
-            // แทรกผลการเดินโดยเฉพาะ (ถ้ามีการกรอกค่า 10MWT)
             if (walkSpeedInterpretation !== "") {
                 report += `🚶 ประสิทธิภาพการเดิน (10MWT): ${walkSpeedInterpretation}\n`;
             }
@@ -561,7 +605,7 @@
             ui.loader();
             let p = {
                 patient_id: document.getElementById('assess-patient').value, 
-                assessment_type: document.querySelector('input[name="assess_type"]:checked').value,
+                assessment_type: document.getElementById('assess-type').value,
                 recommendation: document.getElementById('val-recommendation').value, 
                 tug_sec: document.getElementById('val-tug').value || null, 
                 sts5_sec: document.getElementById('val-sts').value || null, 
@@ -575,13 +619,13 @@
             const {error} = await supabaseClient.from('assessments').insert([p]);
             ui.hide();
             if(error) { return ui.err("บันทึกไม่สำเร็จ Error: " + error.message); }
-            ui.ok("บันทึกประวัติเรียบร้อย"); closeModal('modal-assessment'); loadAssessments(); loadDashboard();
+            ui.ok("บันทึกประวัติเรียบร้อย"); closeModal('modal-assessment'); await loadAssessments(); loadDashboard();
         }
 
         async function loadAssessments() {
             const {data} = await supabaseClient.from('assessments').select('*, patients(*)').order('created_at',{ascending:false});
             allAssessments = data || [];
-            document.getElementById('assessments-list').innerHTML = allAssessments.map(a => `<tr class="border-b"><td class="p-2 text-xs">${new Date(a.created_at).toLocaleDateString('th')}</td><td class="p-2 truncate max-w-[100px]">${a.patients.first_name}</td><td class="p-2 text-xs text-blue-700">${a.overall_risk}</td><td class="p-2 text-center whitespace-nowrap"><button onclick="viewLine('${a.id}')" class="text-white bg-green-600 p-1.5 rounded-full mx-1 shadow"><i class="fab fa-line w-4"></i></button><button onclick="delAss('${a.id}')" class="text-white bg-red-500 p-1.5 rounded-full mx-1 shadow"><i class="fa-solid fa-trash w-4"></i></button></td></tr>`).join('');
+            document.getElementById('assessments-list').innerHTML = allAssessments.map(a => `<tr class="border-b"><td class="p-2 text-xs">${new Date(a.created_at).toLocaleDateString('th')}</td><td class="p-2 truncate max-w-[100px]">${a.patients.first_name}</td><td class="p-2 text-xs font-semibold text-gray-600">${a.assessment_type || '-'}</td><td class="p-2 text-xs text-blue-700">${a.overall_risk}</td><td class="p-2 text-center whitespace-nowrap"><button onclick="viewLine('${a.id}')" class="text-white bg-green-600 p-1.5 rounded-full mx-1 shadow"><i class="fab fa-line w-4"></i></button><button onclick="delAss('${a.id}')" class="text-white bg-red-500 p-1.5 rounded-full mx-1 shadow"><i class="fa-solid fa-trash w-4"></i></button></td></tr>`).join('');
         }
         function viewLine(id) {
             let a = allAssessments.find(x => x.id === id);
@@ -593,20 +637,21 @@
         }
         async function delAss(id) {
             Swal.fire({title: 'ยืนยันการลบผลประเมิน?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'ใช่, ลบเลย!'}).then(async (result) => {
-                if (result.isConfirmed) { ui.loader(); await supabaseClient.from('assessments').delete().eq('id',id); ui.hide(); ui.ok("ลบข้อมูลสำเร็จ"); loadAssessments(); loadDashboard(); }
+                if (result.isConfirmed) { ui.loader(); await supabaseClient.from('assessments').delete().eq('id',id); ui.hide(); ui.ok("ลบข้อมูลสำเร็จ"); await loadAssessments(); loadDashboard(); }
             });
         }
         async function loadDashboard() { 
-            document.getElementById('dash-list').innerHTML = allAssessments.slice(0,5).map(a => `<tr class="border-b"><td class="p-2">${new Date(a.created_at).toLocaleDateString('th')}</td><td class="p-2">${a.patients.first_name}</td><td class="p-2 text-xs text-blue-600">${a.overall_risk}</td></tr>`).join('');
+            document.getElementById('dash-list').innerHTML = allAssessments.slice(0,5).map(a => `<tr class="border-b"><td class="p-2">${new Date(a.created_at).toLocaleDateString('th')}</td><td class="p-2">${a.patients.first_name}</td><td class="p-2 text-xs text-gray-600">${a.assessment_type || '-'}</td><td class="p-2 text-xs text-blue-600">${a.overall_risk}</td></tr>`).join('');
         }
         function exportReport() {
             if(!allAssessments.length) return ui.err("ไม่มีข้อมูลให้ส่งออก");
             let d = allAssessments.map(a => {
                 let walk10m = parseFloat(a.walk10m_sec);
-                let speed = (walk10m > 0) ? (10.0 / walk10m).toFixed(2) : '-';
+                let speed = (walk10m > 0) ? (4.0 / walk10m).toFixed(2) : '-';
                 return { 
                     'วันที่': new Date(a.created_at).toLocaleDateString('th'), 
                     'ชื่อ-สกุล': a.patients.first_name+' '+a.patients.last_name, 
+                    'ครั้งที่ประเมิน': a.assessment_type || '-',
                     'น้ำหนัก': a.weight_kg || '-', 
                     'ส่วนสูง': a.height_cm || '-', 
                     'MNA': a.mna_score, 
